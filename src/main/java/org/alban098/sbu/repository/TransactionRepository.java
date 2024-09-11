@@ -7,6 +7,7 @@
  */
 package org.alban098.sbu.repository;
 
+import org.alban098.sbu.entity.Account;
 import org.alban098.sbu.entity.Transaction;
 import org.alban098.sbu.entity.User;
 import org.springframework.data.domain.Page;
@@ -18,4 +19,7 @@ public interface TransactionRepository extends CrudRepository<Transaction, Strin
 
   @Query("select t from Transaction t where t.account.user = ?1")
   Page<Transaction> findByUser(User user, Pageable pageable);
+
+  @Query("select t from Transaction t where t.account = ?1")
+  Page<Transaction> findByAccount(Account user, Pageable pageable);
 }

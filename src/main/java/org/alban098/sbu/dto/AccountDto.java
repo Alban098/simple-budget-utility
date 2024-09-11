@@ -22,7 +22,7 @@ public class AccountDto implements Dto<Account> {
   private String name;
   private String description;
   private final Collection<AmountDto> balances = new ArrayList<>(Currency.values().length);
-  private final AmountDto amount = new AmountDto(0, Currency.EUR);
+  private AmountDto amount = new AmountDto(0, Currency.EUR);
 
   public AccountDto() {
     for (Currency currency : Currency.values()) {

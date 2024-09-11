@@ -1,14 +1,23 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import React, { useContext } from "react";
+import { Box, IconButton, useTheme } from "@mui/material";
 import { ColorModeContext, tokens } from "../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import AccountSelector from "./selector/AccountSelector";
+import MonthSelector from "./selector/MonthSelector";
+import YearSelector from "./selector/YearSelector";
+import { useLoaderData } from "react-router-dom";
+import { Account } from "../model/Account";
+import { useContext } from "react";
+import CurrencySelector from "./selector/CurrencySelector";
 
 export default function Topbar() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
-
+  const accounts = useLoaderData() as Account[];
+  if (accounts.find((a) => a.name === "All Accounts") == undefined) {
+    accounts.push({ id: "-1", name: "All Accounts" } as Account);
+  }
   return (
     <Box
       sx={{
@@ -18,18 +27,17 @@ export default function Topbar() {
         p: 2,
       }}
     >
-      <Box display="flex">
-        <Typography
-          variant="h2"
-          color={colors.grey[100]}
-          fontWeight="bold"
-          sx={{ mb: "5px" }}
-        >
-          Simple Budget Utility
-        </Typography>
+      <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex", pr: "40px" }}>
+          <AccountSelector accounts={accounts} />
+          <MonthSelector />
+          <YearSelector />
+        </Box>
       </Box>
 
-      <Box display="flex">
+      <CurrencySelector />
+
+      <Box sx={{ display: "flex", pr: "20px" }}>
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
             <DarkModeOutlinedIcon />

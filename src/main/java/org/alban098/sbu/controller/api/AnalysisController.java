@@ -37,7 +37,8 @@ public class AnalysisController {
   }
 
   @GetMapping("/category")
-  public ResponseEntity<Collection<DataValueDto>> analysis(@RequestParam String accountId) {
+  public ResponseEntity<Collection<DataValueDto>> analysis(
+      @RequestParam(required = false) String accountId) {
     Iterable<Category> categories = categoryService.getCategories();
     Collection<DataValueDto> dtos = createDtos(categories);
     dtos.forEach(dto -> dto.setValue(Math.random() * 50000));
@@ -46,7 +47,7 @@ public class AnalysisController {
 
   @GetMapping("/category/yearly")
   public ResponseEntity<Collection<DataValueDto>> yearlyAnalysis(
-      @RequestParam String accountId, @RequestParam int year) {
+      @RequestParam(required = false) String accountId, @RequestParam int year) {
     Iterable<Category> categories = categoryService.getCategories();
     Collection<DataValueDto> dtos = createDtos(categories);
     dtos.forEach(dto -> dto.setValue(Math.random() * 5000));
@@ -55,7 +56,7 @@ public class AnalysisController {
 
   @GetMapping("/category/yearly/month")
   public ResponseEntity<Collection<Collection<DataValueDto>>> yearlyMonthAnalysis(
-      @RequestParam String accountId, @RequestParam int year) {
+      @RequestParam(required = false) String accountId, @RequestParam int year) {
     List<Collection<DataValueDto>> response = new ArrayList<>(12);
     for (Month month : Month.values()) {
       Iterable<Category> categories = categoryService.getCategories();
@@ -68,7 +69,9 @@ public class AnalysisController {
 
   @GetMapping("/category/monthly")
   public ResponseEntity<Collection<DataValueDto>> monthlyAnalysis(
-      @RequestParam String accountId, @RequestParam int month, @RequestParam int year) {
+      @RequestParam(required = false) String accountId,
+      @RequestParam int month,
+      @RequestParam int year) {
     Iterable<Category> categories = categoryService.getCategories();
     Collection<DataValueDto> dtos = createDtos(categories);
     dtos.forEach(dto -> dto.setValue(Math.random() * 500));
@@ -77,7 +80,7 @@ public class AnalysisController {
 
   @GetMapping("/summary/netWorth/yearly")
   public ResponseEntity<Collection<DataLineDto>> netWorthYearlyAnalysis(
-      @RequestParam String accountId, @RequestParam int year) {
+      @RequestParam(required = false) String accountId, @RequestParam int year) {
     Collection<DataLineDto> response = new ArrayList<>();
     List<DataValueDto> total = new ArrayList<>(Year.of(year).length() / 7);
     Page<Account> accounts = accountService.getAccountsOfUser();
@@ -111,7 +114,8 @@ public class AnalysisController {
   }
 
   @GetMapping("/netWorth")
-  public ResponseEntity<Collection<DataValueDto>> netWorth(@RequestParam String accountId) {
+  public ResponseEntity<Collection<DataValueDto>> netWorth(
+      @RequestParam(required = false) String accountId) {
     List<DataValueDto> response = new ArrayList<>(12);
     Page<Account> accounts = accountService.getAccountsOfUser();
     final double[] total = {0};
@@ -131,7 +135,8 @@ public class AnalysisController {
   }
 
   @GetMapping("/summary/netWorth")
-  public ResponseEntity<Collection<DataLineDto>> netWorthAnalysis(@RequestParam String accountId) {
+  public ResponseEntity<Collection<DataLineDto>> netWorthAnalysis(
+      @RequestParam(required = false) String accountId) {
     Collection<DataLineDto> response = new ArrayList<>();
     List<DataValueDto> total = new ArrayList<>();
     Page<Account> accounts = accountService.getAccountsOfUser();
@@ -146,7 +151,11 @@ public class AnalysisController {
           runningTotal += Math.random() * 5000 - 1000;
           DataValueDto value = new DataValueDto();
           value.setValue(runningTotal);
-          value.setLabel(month.getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + ' ' + year);
+          if (month.ordinal() != 0) {
+            value.setLabel(month.getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + "-" + year);
+          } else {
+            value.setLabel(String.valueOf(year));
+          }
           if (total.size() <= index) {
             DataValueDto newValue = new DataValueDto();
             newValue.setLabel(value.getLabel());
@@ -171,7 +180,7 @@ public class AnalysisController {
 
   @GetMapping("/summary/incomeExpense")
   public ResponseEntity<Collection<Collection<DataValueDto>>> incomeExpenseAnalysis(
-      @RequestParam String accountId, @RequestParam int year) {
+      @RequestParam(required = false) String accountId, @RequestParam int year) {
     Collection<Collection<DataValueDto>> response = new ArrayList<>();
     for (Month month : Month.values()) {
       List<DataValueDto> dtos = List.of(new DataValueDto(), new DataValueDto());

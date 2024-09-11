@@ -6,7 +6,7 @@ import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended"
 
 export default [
   {
-    files: ["frontend/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     plugins: { pluginReact },
   },
   {
@@ -15,7 +15,7 @@ export default [
       globals: globals.browser,
     },
   },
-  { ignores: ["frontend/node_modules/*", "frontend/dist/*"] },
+  { ignores: ["node_modules/*", "dist/*"] },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,

@@ -1,11 +1,10 @@
 import { Form, NavigateFunction, useNavigate } from "react-router-dom";
-import { Account } from "../model/Account";
-import React from "react";
+import { Account } from "../../model/Account";
 import { Box, Button, TextField } from "@mui/material";
 
-type Props = {
+interface Props {
   account?: Account;
-};
+}
 
 export default function AccountForm({ account }: Props) {
   const navigate: NavigateFunction = useNavigate();

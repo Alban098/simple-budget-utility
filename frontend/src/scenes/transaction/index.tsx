@@ -17,23 +17,23 @@ import CurrencyChip from "../../component/CurrencyChip";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import React from "react";
 import { Amount } from "../../model/Amount";
 import { Account } from "../../model/Account";
 import { Category } from "../../model/Category";
 import { Transaction } from "../../model/Transaction";
-import { chfTo, Currency, eurTo, usdTo } from "../../constant/Currency";
+import { chfTo, Currency, eurTo, usdTo } from "../../model/Currency";
 import TransactionService from "../../service/TransactionService";
 import AddCardIcon from "@mui/icons-material/AddCard";
+import { Context } from "../../App";
+import { useState } from "react";
 
 type DialogState = {
   opened: boolean;
   id?: string;
 };
 
-export function loader() {
-  return TransactionService.findAll();
+export async function loader(): Promise<Transaction[]> {
+  return await TransactionService.findByAccount(Context.filter.accountId);
 }
 
 export default function TransactionList() {
@@ -43,7 +43,7 @@ export default function TransactionList() {
   const navigate = useNavigate();
   const transactions = useLoaderData() as Transaction[];
 
-  const [deleteDialog, setDeleteDialog] = React.useState({
+  const [deleteDialog, setDeleteDialog] = useState({
     opened: false,
   } as DialogState);
 
@@ -67,37 +67,25 @@ export default function TransactionList() {
     amounts.forEach((amount) => {
       switch (amount.currency) {
         case Currency.EUR:
-          total += eurTo(amount.value, Currency.EUR);
+          total += eurTo(amount.value, Context.currency);
           break;
         case Currency.CHF:
-          total += chfTo(amount.value, Currency.EUR);
+          total += chfTo(amount.value, Context.currency);
           break;
-        case Currency.US_DOLLAR:
-          total += usdTo(amount.value, Currency.EUR);
+        case Currency.USD:
+          total += usdTo(amount.value, Context.currency);
           break;
       }
     });
     return total;
   };
 
-  const renderAccount = (account: Account) => {
-    return (
-      <Link to={`/account/${account.id}`}>
-        <Button
-          fullWidth
-          sx={{ justifyContent: "left", fontSize: "11px" }}
-          color="error"
-          variant="outlined"
-          startIcon={<KeyboardArrowRightIcon />}
-        >
-          {account.name}
-        </Button>
-      </Link>
-    );
-  };
-
   const renderCategory = (category: Category) => {
-    return <Typography sx={{ fontSize: "11px" }}>{category.name}</Typography>;
+    return (
+      <Typography sx={{ color: colors.greenAccent[400] }}>
+        {category.name}
+      </Typography>
+    );
   };
 
   const renderAmounts = (id: string, amounts: Amount[]) => {
@@ -133,7 +121,7 @@ export default function TransactionList() {
       headerName: "Date",
       type: "date",
       resizable: false,
-      width: 100,
+      width: 150,
       valueGetter: (date) => date,
       cellClassName: "date-column--cell",
     },
@@ -141,9 +129,9 @@ export default function TransactionList() {
       field: "account",
       headerName: "Account",
       resizable: false,
-      width: 130,
+      width: 180,
       valueGetter: (account: Account) => account.name,
-      renderCell: ({ row: { account } }) => renderAccount(account),
+      cellClassName: "account-column--cell",
     },
     {
       field: "category",
@@ -188,10 +176,15 @@ export default function TransactionList() {
         },
         "& .MuiDataGrid-cell": {
           borderColor: colors.grey[800],
+          fontSize: "15px",
           alignContent: "center",
         },
         "& .date-column--cell": {
           color: colors.blueAccent[300],
+        },
+        "& .account-column--cell": {
+          color: colors.redAccent[300],
+          fontWeight: "bold",
         },
         "& .MuiDataGrid-columnHeader": {
           backgroundColor: colors.blueAccent[700],

@@ -1,11 +1,10 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import { tokens } from "../theme";
-import React from "react";
 
-type Props = {
+interface Props {
   title: string;
   subtitle: string;
-};
+}
 
 export default function Header({ title, subtitle }: Props) {
   const theme = useTheme();

@@ -8,17 +8,19 @@ import {
 export default class AnalysisService {
   static async categoryAnalysis(accountId: string): Promise<DataValue[]> {
     const response: AxiosResponse<any, DataValue[]> = await axios.get(
-      `http://localhost:8080/api/analysis/category?accountId=${accountId}`,
+      `http://localhost:8080/api/analysis/category` +
+        (accountId != "-1" ? `?accountId=${accountId}` : ""),
     );
     return response.data;
   }
 
   static async categoryYearlyAnalysis(
     accountId: string,
-    month: number,
+    year: number,
   ): Promise<DataValue[]> {
     const response: AxiosResponse<any, DataValue[]> = await axios.get(
-      `http://localhost:8080/api/analysis/category/yearly?accountId=${accountId}&year=${month}`,
+      `http://localhost:8080/api/analysis/category/yearly?year=${year}` +
+        (accountId != "-1" ? `&accountId=${accountId}` : ""),
     );
     return response.data;
   }
@@ -29,7 +31,8 @@ export default class AnalysisService {
     month: number,
   ): Promise<DataValue[]> {
     const response: AxiosResponse<any, DataValue[]> = await axios.get(
-      `http://localhost:8080/api/analysis/category/monthly?accountId=${accountId}&year=${year}&month=${month}`,
+      `http://localhost:8080/api/analysis/category/monthly?year=${year}&month=${month}` +
+        (accountId != "-1" ? `&accountId=${accountId}` : ""),
     );
     return response.data;
   }
@@ -37,27 +40,26 @@ export default class AnalysisService {
   static async categoryYearlyMonthAnalysis(
     accountId: string,
     year: number,
-  ): Promise<Map<number, DataValue[][]>> {
+  ): Promise<DataValue[][]> {
     const response: AxiosResponse<any, DataValue[][]> = await axios.get(
-      `http://localhost:8080/api/analysis/category/yearly/month?accountId=${accountId}&year=${year}`,
+      `http://localhost:8080/api/analysis/category/yearly/month?year=${year}` +
+        (accountId != "-1" ? `&accountId=${accountId}` : ""),
     );
     return response.data;
   }
 
-  static async netWorthInstant(
-    accountId: string,
-  ): Promise<Map<number, DataValue[]>> {
+  static async netWorthInstant(accountId: string): Promise<DataValue[]> {
     const response: AxiosResponse<any, DataLine[][]> = await axios.get(
-      `http://localhost:8080/api/analysis/netWorth?accountId=${accountId}`,
+      `http://localhost:8080/api/analysis/netWorth` +
+        (accountId != "-1" ? `?accountId=${accountId}` : ""),
     );
     return response.data;
   }
 
-  static async netWorthAnalysis(
-    accountId: string,
-  ): Promise<Map<number, DataLine[]>> {
+  static async netWorthAnalysis(accountId: string): Promise<DataLine[]> {
     const response: AxiosResponse<any, DataLine[][]> = await axios.get(
-      `http://localhost:8080/api/analysis/summary/netWorth?accountId=${accountId}`,
+      `http://localhost:8080/api/analysis/summary/netWorth` +
+        (accountId != "-1" ? `?accountId=${accountId}` : ""),
     );
     return response.data;
   }
@@ -65,9 +67,10 @@ export default class AnalysisService {
   static async netWorthYearlyAnalysis(
     accountId: string,
     year: number,
-  ): Promise<Map<number, DataLine[]>> {
+  ): Promise<DataLine[]> {
     const response: AxiosResponse<any, DataLine[]> = await axios.get(
-      `http://localhost:8080/api/analysis/summary/netWorth/yearly?accountId=${accountId}&year=${year}`,
+      `http://localhost:8080/api/analysis/summary/netWorth/yearly?year=${year}` +
+        (accountId != "-1" ? `&accountId=${accountId}` : ""),
     );
     return response.data;
   }
@@ -75,9 +78,10 @@ export default class AnalysisService {
   static async incomeExpenseAnalysis(
     accountId: string,
     year: number,
-  ): Promise<Map<number, DataIncomeExpense[]>> {
+  ): Promise<DataIncomeExpense[]> {
     const response: AxiosResponse<any, DataIncomeExpense[]> = await axios.get(
-      `http://localhost:8080/api/analysis/summary/incomeExpense?accountId=${accountId}&year=${year}`,
+      `http://localhost:8080/api/analysis/summary/incomeExpense?year=${year}` +
+        (accountId != "-1" ? `&accountId=${accountId}` : ""),
     );
     return response.data;
   }

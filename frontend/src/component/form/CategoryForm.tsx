@@ -1,5 +1,4 @@
 import { Form, NavigateFunction, useNavigate } from "react-router-dom";
-import React from "react";
 import { Box, Button, TextField } from "@mui/material";
 
 export default function CategoryForm() {

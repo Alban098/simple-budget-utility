@@ -13,8 +13,10 @@ import java.util.Collection;
 import org.alban098.sbu.controller.AbstractController;
 import org.alban098.sbu.dto.*;
 import org.alban098.sbu.dto.TransactionDto;
+import org.alban098.sbu.entity.Account;
 import org.alban098.sbu.entity.Transaction;
 import org.alban098.sbu.facade.IAuthenticationFacade;
+import org.alban098.sbu.service.AccountService;
 import org.alban098.sbu.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,20 +31,32 @@ public class TransactionApiController extends AbstractController<Transaction> {
   private final TransactionService transactionService;
   private final AccountApiController accountApiController;
   private final CategoryApiController categoryApiController;
+  private final AccountService accountService;
 
   public TransactionApiController(
       IAuthenticationFacade authenticationFacade,
       TransactionService transactionService,
       AccountApiController accountApiController,
-      CategoryApiController categoryApiController) {
+      CategoryApiController categoryApiController,
+      AccountService accountService) {
     super(authenticationFacade);
     this.transactionService = transactionService;
     this.accountApiController = accountApiController;
     this.categoryApiController = categoryApiController;
+    this.accountService = accountService;
   }
 
   @GetMapping("/")
-  public ResponseEntity<Collection<TransactionDto>> list() {
+  public ResponseEntity<Collection<TransactionDto>> list(
+      @RequestParam(required = false) String accountId) {
+    if (accountId != null) {
+      Account account = accountService.getAccount(accountId);
+      accountService.checkAccount(account);
+      Page<Transaction> transactions =
+          transactionService.getTransactionsOfAccount(
+              account, PageRequest.of(0, 100, Sort.by("date").descending()));
+      return ResponseEntity.ok(createDtos(transactions));
+    }
     Page<Transaction> transactions =
         transactionService.getTransactionsOfUser(
             PageRequest.of(0, 100, Sort.by("date").descending()));

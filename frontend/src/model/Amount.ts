@@ -1,11 +1,6 @@
-import { Currency } from "../constant/Currency";
+import { Currency } from "./Currency";
 
-export class Amount {
+export interface Amount {
   value: number;
   currency: Currency;
-
-  constructor(value: number, currency: Currency) {
-    this.value = value;
-    this.currency = currency;
-  }
 }

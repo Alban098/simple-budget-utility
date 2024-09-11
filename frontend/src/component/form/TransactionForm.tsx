@@ -1,25 +1,24 @@
 import { Form, NavigateFunction, useNavigate } from "react-router-dom";
-import React from "react";
 import { Box, Button, InputLabel, Select, TextField } from "@mui/material";
-import { Transaction } from "../model/Transaction";
+import { Transaction } from "../../model/Transaction";
 import dayjs from "dayjs";
 import {
   DatePicker,
   LocalizationProvider,
   PickerValidDate,
 } from "@mui/x-date-pickers";
-import { Category } from "../model/Category";
+import { Category } from "../../model/Category";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Account } from "../model/Account";
-import { Currency } from "../constant/Currency";
+import { Account } from "../../model/Account";
+import { Currency } from "../../model/Currency";
 
-type Props = {
+interface Props {
   transaction?: Transaction;
   categories: Category[];
   accounts: Account[];
-};
+}
 
-export default function AccountForm({
+export default function TransactionForm({
   transaction,
   categories,
   accounts,
@@ -66,7 +65,7 @@ export default function AccountForm({
               native={true}
               variant="filled"
               label="Category"
-              name="category"
+              name="categoryId"
             >
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -86,7 +85,7 @@ export default function AccountForm({
               native={true}
               variant="filled"
               label="Account"
-              name="account"
+              name="accountId"
             >
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>
@@ -135,7 +134,7 @@ export default function AccountForm({
                 color="secondary"
                 defaultValue={
                   transaction?.amounts?.findLast(
-                    (a) => a.currency === Currency.US_DOLLAR,
+                    (a) => a.currency === Currency.USD,
                   )?.value
                 }
               />

@@ -12,9 +12,11 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import org.alban098.sbu.controller.AbstractController;
 import org.alban098.sbu.dto.AccountDto;
+import org.alban098.sbu.dto.AmountDto;
 import org.alban098.sbu.entity.Account;
 import org.alban098.sbu.facade.IAuthenticationFacade;
 import org.alban098.sbu.service.AccountService;
+import org.alban098.sbu.utils.Currency;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,16 +34,20 @@ public class AccountApiController extends AbstractController<Account> {
   }
 
   @GetMapping("/")
-  public ResponseEntity<Collection<AccountDto>> list() {
+  public ResponseEntity<Collection<AccountDto>> list(@RequestParam Currency currency) {
     Page<Account> accounts = accountService.getAccountsOfUser();
-    return ResponseEntity.ok(createDtos(accounts));
+    Collection<AccountDto> accountDtos = createDtos(accounts);
+    accountDtos.forEach(accountDto -> accountDto.getAmount().setCurrency(currency));
+    return ResponseEntity.ok(accountDtos);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<AccountDto> show(@PathVariable String id) {
+  public ResponseEntity<AccountDto> show(@PathVariable String id, @RequestParam Currency currency) {
     Account account = accountService.getAccount(id);
     accountService.checkAccount(account);
-    return ResponseEntity.ok(createDto(account));
+    AccountDto accountDto = createDto(account);
+    accountDto.getAmount().setCurrency(currency);
+    return ResponseEntity.ok(accountDto);
   }
 
   @PostMapping("/")
@@ -71,6 +77,13 @@ public class AccountApiController extends AbstractController<Account> {
     accountDto.setId(account.getId());
     accountDto.setName(account.getName());
     accountDto.setDescription(account.getDescription());
+    accountDto.setBalance(Currency.CHF, Math.random() * 15000 - 3000);
+    accountDto.setBalance(Currency.EUR, Math.random() * 15000 - 3000);
+    double total = 0;
+    for (AmountDto balance : accountDto.getBalances()) {
+      total += balance.getValue() * (balance.getCurrency() == Currency.CHF ? 1.05 : 1);
+    }
+    accountDto.setAmount(new AmountDto(total, Currency.EUR));
     return accountDto;
   }
 }

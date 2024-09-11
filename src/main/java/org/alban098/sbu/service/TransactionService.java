@@ -33,6 +33,11 @@ public class TransactionService {
     return transactionRepository.findByUser(authenticationFacade.getCurrentUser(), pageable);
   }
 
+  public Page<Transaction> getTransactionsOfAccount(
+      final Account account, final Pageable pageable) {
+    return transactionRepository.findByAccount(account, pageable);
+  }
+
   public Transaction getTransaction(final String id) {
     return transactionRepository.findById(id).orElse(null);
   }

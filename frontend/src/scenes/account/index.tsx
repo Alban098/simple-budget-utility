@@ -21,11 +21,12 @@ import AddCardIcon from "@mui/icons-material/AddCard";
 import AccountService from "../../service/AccountService";
 import { Account } from "../../model/Account";
 import React from "react";
+import { Amount } from "../../model/Amount";
 
-type DialogState = {
+interface DialogState {
   opened: boolean;
   id?: string;
-};
+}
 
 export function loader() {
   return AccountService.findAll();
@@ -52,6 +53,18 @@ export default function AccountList() {
       await AccountService.delete(id);
       navigate(".", { replace: true });
     }
+  };
+
+  const renderAmounts = (id: string, amounts?: Amount[]) => {
+    return (
+      <Box p="5px 0">
+        {amounts?.map((amount, index) => (
+          <Box key={id + "_" + index}>
+            <CurrencyChip showZero={false} amount={amount} />
+          </Box>
+        ))}
+      </Box>
+    );
   };
 
   const renderActions = (id: string) => {
@@ -90,6 +103,14 @@ export default function AccountList() {
       cellClassName: "desc-column--cell",
     },
     {
+      field: "balances",
+      headerName: "Balances",
+      resizable: false,
+      width: 180,
+      type: "number",
+      renderCell: ({ row: { id, balances } }) => renderAmounts(id, balances),
+    },
+    {
       field: "amount",
       headerName: "Total",
       resizable: false,
@@ -116,10 +137,13 @@ export default function AccountList() {
           border: "none",
         },
         "& .MuiDataGrid-cell": {
-          border: "none !important",
+          borderColor: colors.grey[800],
+          fontSize: "15px",
+          alignContent: "center",
         },
         "& .name-column--cell": {
-          color: colors.blueAccent[300],
+          color: colors.redAccent[300],
+          fontWeight: "bold",
         },
         "& .MuiDataGrid-columnHeader": {
           backgroundColor: colors.blueAccent[700],
@@ -131,6 +155,9 @@ export default function AccountList() {
         "& .MuiDataGrid-footerContainer": {
           borderTop: "none",
           backgroundColor: colors.blueAccent[700],
+        },
+        "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+          color: `${colors.grey[100]} ! important`,
         },
       }}
     >
@@ -147,7 +174,12 @@ export default function AccountList() {
         </Button>
       </Box>
       <Box m="40px 0 0 0" height="75vh">
-        <DataGrid rows={accounts} columns={columns} />
+        <DataGrid
+          rows={accounts}
+          columns={columns}
+          isRowSelectable={() => false}
+          getRowHeight={() => "auto"}
+        />
       </Box>
       <Dialog
         open={deleteDialog.opened}

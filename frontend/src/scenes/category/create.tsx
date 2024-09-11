@@ -1,15 +1,19 @@
 import { Box } from "@mui/material";
 import Header from "../../component/Header";
 import { redirect } from "react-router-dom";
-import React from "react";
-import CategoryForm from "../../form/CategoryForm";
+import CategoryForm from "../../component/form/CategoryForm";
 import CategoryService from "../../service/CategoryService";
 import { Category } from "../../model/Category";
 
-// @ts-ignore
-export async function action({ request }): Promise<Response> {
+interface ActionParameters {
+  request: Request;
+}
+
+export async function action({ request }: ActionParameters): Promise<Response> {
   const formData = await request.formData();
-  await CategoryService.create(Object.fromEntries(formData) as Category);
+  await CategoryService.create(
+    Object.fromEntries(formData) as unknown as Category,
+  );
   return redirect("/");
 }
 

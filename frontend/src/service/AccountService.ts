@@ -1,24 +1,14 @@
 import axios, { AxiosResponse } from "axios";
 import { Account } from "../model/Account";
-import { Currency } from "../constant/Currency";
+import { Currency } from "../model/Currency";
 import { Amount } from "../model/Amount";
+import { Context } from "../App";
 
 export default class AccountService {
   static async findAll(): Promise<Account[]> {
     const response: AxiosResponse<any, Account[]> = await axios.get(
       "http://localhost:8080/api/account/",
-    );
-    const accounts: Account[] = [];
-    response.data.forEach((account: Account) =>
-      accounts.push(this.convertCurrencies(account)),
-    );
-    return accounts;
-  }
-
-  static async findByName(query: string): Promise<Account[]> {
-    const response: AxiosResponse<any, Account[]> = await axios.get(
-      "http://localhost:8080/api/account/",
-      { params: { query: query } },
+      { params: { currency: Context.currency } },
     );
     const accounts: Account[] = [];
     response.data.forEach((account: Account) =>
@@ -30,6 +20,7 @@ export default class AccountService {
   static async find(id: string): Promise<Account> {
     const response: AxiosResponse<any, Account> = await axios.get(
       "http://localhost:8080/api/account/" + id,
+      { params: { currency: Context.currency } },
     );
     return this.convertCurrencies(response.data);
   }
@@ -58,14 +49,15 @@ export default class AccountService {
     const castedBalance: Amount[] = [];
     account.balances?.forEach((balance) => {
       castedBalance.push({
-        // @ts-ignore
-        currency: Currency[balance.currency as Currency],
+        currency: Currency[balance.currency as keyof typeof Currency],
         value: balance.value,
       });
     });
     account.balances = castedBalance;
-    // @ts-ignore
-    account.amount.currency = Currency[account.amount.currency as Currency];
+    if (account.amount != null) {
+      account.amount.currency =
+        Currency[account.amount.currency as keyof typeof Currency];
+    }
     return account;
   }
 }

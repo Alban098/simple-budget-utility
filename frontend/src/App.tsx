@@ -27,10 +27,22 @@ import TransactionCreate, {
   loader as transactionCreateLoader,
   action as createTransactionAction,
 } from "./scenes/transaction/create";
+import dayjs from "dayjs";
+import { Currency } from "./model/Currency";
+
+export const Context = {
+  filter: {
+    accountId: "-1",
+    month: dayjs().month(),
+    year: dayjs().year(),
+  },
+  currency: Currency.EUR,
+};
 
 const router = createBrowserRouter([
   {
     element: <Layout />,
+    loader: accountLoader,
     children: [
       {
         path: "/",

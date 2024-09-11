@@ -13,7 +13,7 @@ import lombok.Getter;
 public enum Currency {
   EUR("€"),
   CHF("CHF"),
-  US_DOLLAR("$");
+  USD("$US");
 
   private final String symbol;
 

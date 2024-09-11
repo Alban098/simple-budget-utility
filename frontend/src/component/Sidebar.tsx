@@ -1,8 +1,7 @@
-import React, { ReactNode, useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import "react-pro-sidebar/dist/css/styles.css";
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
-import { Link, To } from "react-router-dom";
+import { Link, To, useLocation } from "react-router-dom";
 import { tokens } from "../theme";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
@@ -11,25 +10,24 @@ import UploadIcon from "@mui/icons-material/Upload";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import { ReactNode, useState } from "react";
 
-type ItemParams = {
+interface ItemParams {
   title: string;
   to: To;
   icon: ReactNode;
-  selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
-};
+  location: string;
+}
 
-function Item({ title, to, icon, selected, setSelected }: ItemParams) {
+function Item({ title, to, icon, location }: ItemParams) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
     <MenuItem
-      active={selected === title}
+      active={location === to}
       style={{
         color: colors.grey[100],
       }}
-      onClick={() => setSelected(title)}
       icon={icon}
     >
       <Typography>{title}</Typography>
@@ -40,9 +38,9 @@ function Item({ title, to, icon, selected, setSelected }: ItemParams) {
 
 export default function Sidebar() {
   const theme = useTheme();
+  const location = useLocation();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
 
   return (
     <Box
@@ -96,8 +94,7 @@ export default function Sidebar() {
               title="Dashboard"
               to="/"
               icon={<QueryStatsIcon />}
-              selected={selected}
-              setSelected={setSelected}
+              location={location.pathname}
             />
 
             {!isCollapsed && (
@@ -114,15 +111,13 @@ export default function Sidebar() {
               title="Accounts"
               to="/account"
               icon={<AccountBalanceOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
+              location={location.pathname}
             />
             <Item
               title="Transactions"
               to="/transaction"
               icon={<ReceiptLongOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
+              location={location.pathname}
             />
             {!isCollapsed && (
               <Typography
@@ -138,8 +133,7 @@ export default function Sidebar() {
               title="Category"
               to="/category"
               icon={<FormatListBulletedIcon />}
-              selected={selected}
-              setSelected={setSelected}
+              location={location.pathname}
             />
             {!isCollapsed && (
               <Typography
@@ -155,8 +149,7 @@ export default function Sidebar() {
               title="Account Statement"
               to="/transaction/import"
               icon={<UploadIcon />}
-              selected={selected}
-              setSelected={setSelected}
+              location={location.pathname}
             />
             {!isCollapsed && (
               <Typography
@@ -172,8 +165,7 @@ export default function Sidebar() {
               title="By Category"
               to="/analysis/categories"
               icon={<EqualizerOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
+              location={location.pathname}
             />
           </Box>
         </Menu>

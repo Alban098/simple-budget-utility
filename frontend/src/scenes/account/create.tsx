@@ -1,14 +1,19 @@
 import { Box } from "@mui/material";
 import Header from "../../component/Header";
 import AccountService from "../../service/AccountService";
-import AccountForm from "../../form/AccountForm";
+import AccountForm from "../../component/form/AccountForm";
 import { redirect } from "react-router-dom";
 import { Account } from "../../model/Account";
 
-// @ts-ignore
-export async function action({ request }): Promise<Response> {
+interface ActionParameters {
+  request: Request;
+}
+
+export async function action({ request }: ActionParameters): Promise<Response> {
   const formData = await request.formData();
-  await AccountService.create(Object.fromEntries(formData) as Account);
+  await AccountService.create(
+    Object.fromEntries(formData) as unknown as Account,
+  );
   return redirect("/account");
 }
 

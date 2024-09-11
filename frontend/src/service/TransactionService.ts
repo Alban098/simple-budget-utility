@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { Transaction } from "../model/Transaction";
-import { Currency } from "../constant/Currency";
+import { Currency } from "../model/Currency";
 import { Amount } from "../model/Amount";
 
 export default class TransactionService {
@@ -15,10 +15,13 @@ export default class TransactionService {
     return transactions;
   }
 
-  static async findByName(query: string): Promise<Transaction[]> {
+  static async findByAccount(accountId?: string): Promise<Transaction[]> {
+    if (accountId == null || accountId === "-1") {
+      return this.findAll();
+    }
     const response: AxiosResponse<any, Transaction[]> = await axios.get(
       "http://localhost:8080/api/transaction/",
-      { params: { query: query } },
+      { params: { accountId: accountId } },
     );
     const transactions: Transaction[] = [];
     response.data.forEach((transaction: Transaction) =>
@@ -60,8 +63,7 @@ export default class TransactionService {
     const castedAmounts: Amount[] = [];
     transaction.amounts?.forEach((balance) => {
       castedAmounts.push({
-        //@ts-ignore
-        currency: Currency[balance.currency as Currency],
+        currency: Currency[balance.currency as keyof typeof Currency],
         value: balance.value,
       });
     });
