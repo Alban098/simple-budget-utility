@@ -7,6 +7,8 @@
  */
 package org.alban098.sbu.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import lombok.AllArgsConstructor;
 import org.alban098.sbu.dto.CategoryDto;
 import org.alban098.sbu.entity.Category;
@@ -31,5 +33,20 @@ public class CategoryService {
     Category category = new Category();
     category.setName(accountDto.getName());
     return categoryRepository.save(category);
+  }
+
+  public CategoryDto createDto(Category category) {
+    CategoryDto dto = new CategoryDto();
+    dto.setId(category.getId());
+    dto.setName(category.getName());
+    return dto;
+  }
+
+  public Collection<CategoryDto> createDtos(Iterable<Category> Category) {
+    Collection<CategoryDto> dtos = new ArrayList<>();
+    for (Category category : Category) {
+      dtos.add(createDto(category));
+    }
+    return dtos;
   }
 }

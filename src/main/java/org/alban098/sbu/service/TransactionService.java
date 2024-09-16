@@ -7,8 +7,15 @@
  */
 package org.alban098.sbu.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.alban098.sbu.dto.AccountDto;
 import org.alban098.sbu.dto.AmountDto;
+import org.alban098.sbu.dto.CategoryDto;
 import org.alban098.sbu.dto.TransactionDto;
 import org.alban098.sbu.entity.Account;
 import org.alban098.sbu.entity.Category;
@@ -28,6 +35,40 @@ public class TransactionService {
   private final IAuthenticationFacade authenticationFacade;
   private final AccountService accountService;
   private final CategoryService categoryService;
+
+  public Iterable<Transaction> getTransactionsOfUser(final LocalDate from, final LocalDate to) {
+    return transactionRepository.findByUserAndDateBetweenOrderByDateAsc(
+        authenticationFacade.getCurrentUser(), from, to);
+  }
+
+  public Iterable<Transaction> getPositiveTransactionsOfAccount(
+      final Account account, final LocalDate from, final LocalDate to) {
+    return transactionRepository.findByAccountAndDateBetweenAndAmountsPositiveOrderByDateAsc(
+        account, from, to);
+  }
+
+  public Iterable<Transaction> getPositiveTransactionsOfUser(
+      final LocalDate from, final LocalDate to) {
+    return transactionRepository.findByUserAndDateBetweenAndAmountPositiveThanOrderByDateAsc(
+        authenticationFacade.getCurrentUser(), from, to);
+  }
+
+  public Iterable<Transaction> getNegativeTransactionsOfAccount(
+      final Account account, final LocalDate from, final LocalDate to) {
+    return transactionRepository.findByAccountAndDateBetweenAndAmountsNegativeOrderByDateAsc(
+        account, from, to);
+  }
+
+  public Iterable<Transaction> getNegativeTransactionsOfUser(
+      final LocalDate from, final LocalDate to) {
+    return transactionRepository.findByUserAndDateBetweenAndAmountNegativeThanOrderByDateAsc(
+        authenticationFacade.getCurrentUser(), from, to);
+  }
+
+  public Iterable<Transaction> getTransactionsOfAccount(
+      final Account account, final LocalDate from, final LocalDate to) {
+    return transactionRepository.findByAccountAndDateBetweenOrderByDateAsc(account, from, to);
+  }
 
   public Page<Transaction> getTransactionsOfUser(final Pageable pageable) {
     return transactionRepository.findByUser(authenticationFacade.getCurrentUser(), pageable);
@@ -59,7 +100,8 @@ public class TransactionService {
 
     Category category = categoryService.getCategory(transactionDto.getCategory().getId());
     if (category == null) {
-      throw new RuntimeException("Category is not found");
+      throw new EntityNotFoundException(
+          "Category not found : " + transactionDto.getCategory().getId());
     }
     transaction.setCategory(category);
     transaction.setDate(transactionDto.getDate());
@@ -84,7 +126,8 @@ public class TransactionService {
       Category category = categoryService.getCategory(transactionDto.getCategory().getId());
       transaction.setCategory(category);
       if (category == null) {
-        throw new RuntimeException("Category is not found");
+        throw new EntityNotFoundException(
+            "Category not found : " + transactionDto.getCategory().getId());
       }
     }
     transaction.setDate(
@@ -110,7 +153,51 @@ public class TransactionService {
   public void checkTransaction(Transaction transaction) {
     if (transaction == null
         || !transaction.getAccount().getUser().equals(authenticationFacade.getCurrentUser())) {
-      throw new ForbiddenException("This transaction does not belong to this user account");
+      throw new ForbiddenException(
+          "This Transaction does not belong to an account of the logged in User");
     }
+  }
+
+  public TransactionDto createDto(Transaction transaction) {
+    AccountDto accountDto = accountService.createDto(transaction.getAccount());
+    CategoryDto categoryDto = categoryService.createDto(transaction.getCategory());
+    TransactionDto transactionDto = new TransactionDto();
+    transactionDto.setId(transaction.getId());
+    transactionDto.setDate(transaction.getDate());
+    transactionDto.setDescription(transaction.getDescription());
+    transactionDto.setCategory(categoryDto);
+    transactionDto.setAccount(accountDto);
+    transaction
+        .getAmounts()
+        .forEach(amount -> transactionDto.setAmount(amount.getCurrency(), amount.getValue()));
+    return transactionDto;
+  }
+
+  public Collection<TransactionDto> createDtos(Iterable<Transaction> transactions) {
+    Collection<TransactionDto> dtos = new ArrayList<>();
+    for (Transaction transaction : transactions) {
+      dtos.add(createDto(transaction));
+    }
+    return dtos;
+  }
+
+  public LocalDate getDateOfFirstTransaction(
+      Account account, LocalDate startDate, LocalDate endDate) {
+    Optional<Transaction> transaction =
+        transactionRepository.getFirstTransactionOfAccount(account, startDate, endDate);
+    if (transaction.isPresent()) {
+      return transaction.get().getDate();
+    }
+    return LocalDate.now();
+  }
+
+  public LocalDate getDateOfLastTransaction(
+      Account account, LocalDate startDate, LocalDate endDate) {
+    Optional<Transaction> transaction =
+        transactionRepository.getLastTransactionOfAccount(account, startDate, endDate);
+    if (transaction.isPresent()) {
+      return transaction.get().getDate();
+    }
+    return LocalDate.now();
   }
 }

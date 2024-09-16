@@ -8,18 +8,12 @@
 package org.alban098.sbu.dto;
 
 import lombok.*;
-import org.alban098.sbu.entity.Category;
 
 @Getter
 @Setter
-public class CategoryDto implements Dto<Category> {
+public class CategoryDto {
 
   private String id;
   private String name;
   private Double expense;
-
-  @Override
-  public boolean validate() {
-    return true;
-  }
 }

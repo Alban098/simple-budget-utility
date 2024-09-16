@@ -18,9 +18,4 @@ public interface AccountRepository extends CrudRepository<Account, String> {
 
   @Query("select a from Account a where a.user = ?1")
   Page<Account> findByUser(User user, Pageable pageable);
-
-  @Query(
-      "select a from Account a where a.user = ?1 and upper(a.name) like upper(concat('%', ?2,"
-          + " '%'))")
-  Page<Account> findByUserAndNameContainsIgnoreCase(User user, String name, Pageable pageable);
 }

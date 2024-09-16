@@ -33,11 +33,11 @@ export default function LineChart({ analysis, axisLabels }: Props) {
         type: "linear",
         min: "auto",
         max: "auto",
-        stacked: true,
+        stacked: false,
         reverse: false,
       }}
       yFormat=">-d"
-      curve="natural"
+      curve="linear"
       axisBottom={{
         tickValues: axisLabels,
         tickSize: 5,

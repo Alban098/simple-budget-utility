@@ -42,7 +42,7 @@ export default class AnalysisService {
       {
         params: {
           year: Context.filter.year,
-          month: Context.filter.month,
+          month: Context.filter.month + 1,
           accountId:
             Context.filter.accountId !== "-1"
               ? Context.filter.accountId
@@ -76,10 +76,6 @@ export default class AnalysisService {
       `http://localhost:8080/api/analysis/netWorth`,
       {
         params: {
-          accountId:
-            Context.filter.accountId !== "-1"
-              ? Context.filter.accountId
-              : undefined,
           currency: Context.currency,
         },
       },
@@ -92,10 +88,6 @@ export default class AnalysisService {
       `http://localhost:8080/api/analysis/summary/netWorth`,
       {
         params: {
-          accountId:
-            Context.filter.accountId !== "-1"
-              ? Context.filter.accountId
-              : undefined,
           currency: Context.currency,
         },
       },
@@ -109,10 +101,6 @@ export default class AnalysisService {
       {
         params: {
           year: Context.filter.year,
-          accountId:
-            Context.filter.accountId !== "-1"
-              ? Context.filter.accountId
-              : undefined,
           currency: Context.currency,
         },
       },

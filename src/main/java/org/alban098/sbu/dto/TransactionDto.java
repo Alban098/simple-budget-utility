@@ -12,12 +12,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import lombok.Getter;
 import lombok.Setter;
-import org.alban098.sbu.entity.Transaction;
 import org.alban098.sbu.utils.Currency;
 
 @Getter
 @Setter
-public class TransactionDto implements Dto<Transaction> {
+public class TransactionDto {
 
   private String id;
   private CategoryDto category;
@@ -37,10 +36,5 @@ public class TransactionDto implements Dto<Transaction> {
         .filter(b -> b.getCurrency().equals(currency))
         .findFirst()
         .ifPresent(b -> b.setValue(value));
-  }
-
-  @Override
-  public boolean validate() {
-    return true;
   }
 }

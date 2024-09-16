@@ -5,17 +5,14 @@
  *
  * Code licensed under MIT license.
  */
-package org.alban098.sbu.controller.api;
+package org.alban098.sbu.controller;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import org.alban098.sbu.controller.AbstractController;
-import org.alban098.sbu.dto.*;
 import org.alban098.sbu.dto.TransactionDto;
 import org.alban098.sbu.entity.Account;
 import org.alban098.sbu.entity.Transaction;
-import org.alban098.sbu.facade.IAuthenticationFacade;
 import org.alban098.sbu.service.AccountService;
 import org.alban098.sbu.service.TransactionService;
 import org.springframework.data.domain.Page;
@@ -26,23 +23,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/transaction")
-public class TransactionApiController extends AbstractController<Transaction> {
+public class TransactionController {
 
   private final TransactionService transactionService;
-  private final AccountApiController accountApiController;
-  private final CategoryApiController categoryApiController;
   private final AccountService accountService;
 
-  public TransactionApiController(
-      IAuthenticationFacade authenticationFacade,
-      TransactionService transactionService,
-      AccountApiController accountApiController,
-      CategoryApiController categoryApiController,
-      AccountService accountService) {
-    super(authenticationFacade);
+  public TransactionController(
+      TransactionService transactionService, AccountService accountService) {
     this.transactionService = transactionService;
-    this.accountApiController = accountApiController;
-    this.categoryApiController = categoryApiController;
     this.accountService = accountService;
   }
 
@@ -55,19 +43,19 @@ public class TransactionApiController extends AbstractController<Transaction> {
       Page<Transaction> transactions =
           transactionService.getTransactionsOfAccount(
               account, PageRequest.of(0, 100, Sort.by("date").descending()));
-      return ResponseEntity.ok(createDtos(transactions));
+      return ResponseEntity.ok(transactionService.createDtos(transactions));
     }
     Page<Transaction> transactions =
         transactionService.getTransactionsOfUser(
             PageRequest.of(0, 100, Sort.by("date").descending()));
-    return ResponseEntity.ok(createDtos(transactions));
+    return ResponseEntity.ok(transactionService.createDtos(transactions));
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<TransactionDto> show(@PathVariable String id) {
     Transaction transaction = transactionService.getTransaction(id);
     transactionService.checkTransaction(transaction);
-    return ResponseEntity.ok(createDto(transaction));
+    return ResponseEntity.ok(transactionService.createDto(transaction));
   }
 
   @PostMapping("/")
@@ -75,35 +63,19 @@ public class TransactionApiController extends AbstractController<Transaction> {
       throws URISyntaxException {
     Transaction transaction = transactionService.create(transactionDto);
     return ResponseEntity.created(new URI("/api/transaction/" + transaction.getId()))
-        .body(createDto(transaction));
+        .body(transactionService.createDto(transaction));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<TransactionDto> update(
       @PathVariable String id, @RequestBody TransactionDto transactionDto) {
     Transaction transaction = transactionService.update(id, transactionDto);
-    return ResponseEntity.ok(createDto(transaction));
+    return ResponseEntity.ok(transactionService.createDto(transaction));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<TransactionDto> delete(@PathVariable String id) {
     transactionService.delete(id);
     return ResponseEntity.ok().build();
-  }
-
-  @Override
-  protected TransactionDto createDto(Transaction transaction) {
-    AccountDto accountDto = accountApiController.createDto(transaction.getAccount());
-    CategoryDto categoryDto = categoryApiController.createDto(transaction.getCategory());
-    TransactionDto transactionDto = new TransactionDto();
-    transactionDto.setId(transaction.getId());
-    transactionDto.setDate(transaction.getDate());
-    transactionDto.setDescription(transaction.getDescription());
-    transactionDto.setCategory(categoryDto);
-    transactionDto.setAccount(accountDto);
-    transaction
-        .getAmounts()
-        .forEach(amount -> transactionDto.setAmount(amount.getCurrency(), amount.getValue()));
-    return transactionDto;
   }
 }

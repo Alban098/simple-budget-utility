@@ -14,7 +14,6 @@ import Header from "../../component/Header";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import CurrencyChip from "../../component/CurrencyChip";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCardIcon from "@mui/icons-material/AddCard";
@@ -70,11 +69,6 @@ export default function AccountList() {
   const renderActions = (id: string) => {
     return (
       <Box display="inline-block" justifyContent="right">
-        <Link to={"/account/" + id}>
-          <IconButton>
-            <VisibilityIcon />
-          </IconButton>
-        </Link>
         <Link to={"/account/" + id + "/edit"}>
           <IconButton color="secondary">
             <EditIcon />
@@ -124,7 +118,7 @@ export default function AccountList() {
       field: "id",
       headerName: "",
       resizable: false,
-      width: 140,
+      width: 100,
       renderCell: ({ row: { id } }) => renderActions(id),
     },
   ];

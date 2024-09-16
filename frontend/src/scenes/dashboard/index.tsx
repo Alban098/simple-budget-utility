@@ -29,11 +29,17 @@ export async function loader(): Promise<LoaderData> {
 function formatAllTimeAxis(line?: DataLine): string[] | undefined {
   if (line != null) {
     const keys = [] as string[];
-    line.data.forEach((value) => {
-      if (!Number.isNaN(parseInt(value.label))) {
+    if (line.data.length <= 12) {
+      line.data.forEach((value) => {
         keys.push(value.label);
-      }
-    });
+      });
+    } else {
+      line.data.forEach((value) => {
+        if (!Number.isNaN(parseInt(value.label))) {
+          keys.push(value.label);
+        }
+      });
+    }
     return keys;
   }
   return undefined;

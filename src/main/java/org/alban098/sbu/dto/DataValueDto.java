@@ -11,6 +11,8 @@ import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DataValueDto {
 
   private String label;

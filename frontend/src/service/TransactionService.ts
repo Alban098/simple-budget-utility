@@ -8,7 +8,6 @@ export default class TransactionService {
   static async findAll(): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.get(
       "http://localhost:8080/api/transaction/",
-      { params: { currency: Context.currency } },
     );
     const transactions: Transaction[] = [];
     response.data.forEach((transaction: Transaction) =>
@@ -23,7 +22,7 @@ export default class TransactionService {
     }
     const response: AxiosResponse<Transaction[]> = await axios.get(
       "http://localhost:8080/api/transaction/",
-      { params: { accountId: accountId, currency: Context.currency } },
+      { params: { accountId: accountId } },
     );
     const transactions: Transaction[] = [];
     response.data.forEach((transaction: Transaction) =>
