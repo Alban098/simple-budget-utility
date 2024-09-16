@@ -2,11 +2,13 @@ import axios, { AxiosResponse } from "axios";
 import { Transaction } from "../model/Transaction";
 import { Currency } from "../model/Currency";
 import { Amount } from "../model/Amount";
+import { Context } from "../App";
 
 export default class TransactionService {
   static async findAll(): Promise<Transaction[]> {
-    const response: AxiosResponse<any, Transaction[]> = await axios.get(
+    const response: AxiosResponse<Transaction[]> = await axios.get(
       "http://localhost:8080/api/transaction/",
+      { params: { currency: Context.currency } },
     );
     const transactions: Transaction[] = [];
     response.data.forEach((transaction: Transaction) =>
@@ -19,9 +21,9 @@ export default class TransactionService {
     if (accountId == null || accountId === "-1") {
       return this.findAll();
     }
-    const response: AxiosResponse<any, Transaction[]> = await axios.get(
+    const response: AxiosResponse<Transaction[]> = await axios.get(
       "http://localhost:8080/api/transaction/",
-      { params: { accountId: accountId } },
+      { params: { accountId: accountId, currency: Context.currency } },
     );
     const transactions: Transaction[] = [];
     response.data.forEach((transaction: Transaction) =>
@@ -31,15 +33,16 @@ export default class TransactionService {
   }
 
   static async find(id: string): Promise<Transaction> {
-    const response: AxiosResponse<any, Transaction> = await axios.get(
-      "http://localhost:8080/api/transaction/" + id,
+    const response: AxiosResponse<Transaction> = await axios.get(
+      `http://localhost:8080/api/transaction/${id}`,
+      { params: { currency: Context.currency } },
     );
     return this.convertDto(response.data);
   }
 
   static async create(dto: Transaction): Promise<Transaction> {
     dto.date = new Date(dto.date);
-    const response: AxiosResponse<any, Transaction> = await axios.post(
+    const response: AxiosResponse<Transaction> = await axios.post(
       "http://localhost:8080/api/transaction/",
       dto,
     );
@@ -48,15 +51,15 @@ export default class TransactionService {
 
   static async update(id: string, dto: Transaction): Promise<Transaction> {
     dto.date = new Date(dto.date);
-    const response: AxiosResponse<any, Transaction> = await axios.put(
-      "http://localhost:8080/api/transaction/" + id,
+    const response: AxiosResponse<Transaction> = await axios.put(
+      `http://localhost:8080/api/transaction/${id}`,
       dto,
     );
     return this.convertDto(response.data);
   }
 
   static async delete(id: string) {
-    await axios.delete("http://localhost:8080/api/transaction/" + id);
+    await axios.delete(`http://localhost:8080/api/transaction/${id}`);
   }
 
   private static convertDto(transaction: Transaction): Transaction {

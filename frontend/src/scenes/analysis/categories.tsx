@@ -17,22 +17,12 @@ interface LoaderData {
   analysis: DataValue[][];
 }
 
-export async function loader() {
+export async function loader(): Promise<LoaderData> {
   return {
-    total: await AnalysisService.categoryAnalysis(Context.filter.accountId),
-    yearly: await AnalysisService.categoryYearlyAnalysis(
-      Context.filter.accountId,
-      Context.filter.year,
-    ),
-    monthly: await AnalysisService.categoryMonthlyAnalysis(
-      Context.filter.accountId,
-      Context.filter.year,
-      Context.filter.month,
-    ),
-    analysis: await AnalysisService.categoryYearlyMonthAnalysis(
-      Context.filter.accountId,
-      Context.filter.year,
-    ),
+    total: await AnalysisService.categoryAnalysis(),
+    yearly: await AnalysisService.categoryYearlyAnalysis(),
+    monthly: await AnalysisService.categoryMonthlyAnalysis(),
+    analysis: await AnalysisService.categoryYearlyMonthAnalysis(),
   };
 }
 

@@ -28,7 +28,7 @@ interface DialogState {
   id?: string;
 }
 
-export function loader() {
+export function loader(): Promise<Account[]> {
   return AccountService.findAll();
 }
 

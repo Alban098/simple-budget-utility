@@ -15,6 +15,11 @@ interface ActionParameters {
   request: Request;
 }
 
+interface LoaderData {
+  categories: Category[];
+  accounts: Account[];
+}
+
 interface TransactionFormData {
   date: Date;
   description: string;
@@ -46,7 +51,7 @@ export async function action({ request }: ActionParameters): Promise<Response> {
   return redirect("/transaction");
 }
 
-export async function loader() {
+export async function loader(): Promise<LoaderData> {
   return {
     categories: await CategoryService.findAll(),
     accounts: await AccountService.findAll(),

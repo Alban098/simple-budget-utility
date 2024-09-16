@@ -102,7 +102,10 @@ export default function App() {
 }
 
 function Layout() {
-  const [theme, colorMode] = useMode() as [Theme, any];
+  const [theme, colorMode] = useMode() as [
+    Theme,
+    { toggleColorMode: () => void },
+  ];
 
   return (
     <ColorModeContext.Provider value={colorMode}>

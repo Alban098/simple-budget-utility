@@ -6,7 +6,7 @@ import { Context } from "../App";
 
 export default class AccountService {
   static async findAll(): Promise<Account[]> {
-    const response: AxiosResponse<any, Account[]> = await axios.get(
+    const response: AxiosResponse<Account[]> = await axios.get(
       "http://localhost:8080/api/account/",
       { params: { currency: Context.currency } },
     );
@@ -18,15 +18,15 @@ export default class AccountService {
   }
 
   static async find(id: string): Promise<Account> {
-    const response: AxiosResponse<any, Account> = await axios.get(
-      "http://localhost:8080/api/account/" + id,
+    const response: AxiosResponse<Account> = await axios.get(
+      `http://localhost:8080/api/account/${id}`,
       { params: { currency: Context.currency } },
     );
     return this.convertCurrencies(response.data);
   }
 
   static async create(dto: Account): Promise<Account> {
-    const response: AxiosResponse<any, Account> = await axios.post(
+    const response: AxiosResponse<Account> = await axios.post(
       "http://localhost:8080/api/account/",
       dto,
     );
@@ -34,15 +34,15 @@ export default class AccountService {
   }
 
   static async update(id: string, dto: Account): Promise<Account> {
-    const response: AxiosResponse<any, Account> = await axios.put(
-      "http://localhost:8080/api/account/" + id,
+    const response: AxiosResponse<Account> = await axios.put(
+      `http://localhost:8080/api/account/${id}`,
       dto,
     );
     return this.convertCurrencies(response.data);
   }
 
   static async delete(id: string) {
-    await axios.delete("http://localhost:8080/api/account/" + id);
+    await axios.delete(`http://localhost:8080/api/account/${id}`);
   }
 
   private static convertCurrencies(account: Account): Account {

@@ -12,10 +12,10 @@ function extractKeys(analysis: DataValue[][]): {
   keys: string[];
   data: BarDatum[];
 } {
-  const data: any[] = [];
+  const data: BarDatum[] = [];
   const keys: string[] = [];
   analysis.forEach((monthlyData, month) => {
-    const monthEntry = {} as any;
+    const monthEntry = {} as BarDatum;
     monthEntry.month = dayjs().month(month).format("MMM");
     monthlyData.forEach((entry) => {
       monthEntry[entry.label] = entry.value;

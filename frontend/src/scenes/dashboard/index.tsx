@@ -17,20 +17,12 @@ interface LoaderData {
   incomesExpenses: DataValue[][];
 }
 
-export async function loader() {
+export async function loader(): Promise<LoaderData> {
   return {
-    netWorth: await AnalysisService.netWorthInstant(Context.filter.accountId),
-    netWorthAllTime: await AnalysisService.netWorthAnalysis(
-      Context.filter.accountId,
-    ),
-    netWorkYearly: await AnalysisService.netWorthYearlyAnalysis(
-      Context.filter.accountId,
-      Context.filter.year,
-    ),
-    incomesExpenses: await AnalysisService.incomeExpenseAnalysis(
-      Context.filter.accountId,
-      Context.filter.year,
-    ),
+    netWorth: await AnalysisService.netWorthInstant(),
+    netWorthAllTime: await AnalysisService.netWorthAnalysis(),
+    netWorkYearly: await AnalysisService.netWorthYearlyAnalysis(),
+    incomesExpenses: await AnalysisService.incomeExpenseAnalysis(),
   };
 }
 
