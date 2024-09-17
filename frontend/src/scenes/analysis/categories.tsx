@@ -2,32 +2,37 @@ import Header from "../../component/Header";
 import { Box, useTheme } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import dayjs from "dayjs";
-import { useLoaderData } from "react-router-dom";
+import { Await, useLoaderData } from "react-router-dom";
 import { tokens } from "../../theme";
 import AnalysisService from "../../service/AnalysisService";
 import { DataValue } from "../../model/AnalysisObject";
 import ExpensesPieCard from "../../component/card/ExpensesPieCard";
 import CategoryExpensesCard from "../../component/card/CategoryExpensesCard";
 import { Context } from "../../App";
+import LoadingCard from "../../component/card/LoadingCard";
+import { Suspense } from "react";
 
 interface LoaderData {
-  total: DataValue[];
-  yearly: DataValue[];
-  monthly: DataValue[];
-  analysis: DataValue[][];
+  totalPromise: Promise<DataValue[]>;
+  yearlyPromise: Promise<DataValue[]>;
+  monthlyPromise: Promise<DataValue[]>;
+  analysisPromise: Promise<DataValue[][]>;
 }
 
-export async function loader(): Promise<LoaderData> {
+export function loader(): LoaderData {
   return {
-    total: await AnalysisService.categoryAnalysis(),
-    yearly: await AnalysisService.categoryYearlyAnalysis(),
-    monthly: await AnalysisService.categoryMonthlyAnalysis(),
-    analysis: await AnalysisService.categoryYearlyMonthAnalysis(),
+    totalPromise: AnalysisService.categoryAnalysis(Context.apiToken),
+    yearlyPromise: AnalysisService.categoryYearlyAnalysis(Context.apiToken),
+    monthlyPromise: AnalysisService.categoryMonthlyAnalysis(Context.apiToken),
+    analysisPromise: AnalysisService.categoryYearlyMonthAnalysis(
+      Context.apiToken,
+    ),
   };
 }
 
 export default function CategoryAnalysis() {
-  const { total, yearly, monthly, analysis } = useLoaderData() as LoaderData;
+  const { totalPromise, yearlyPromise, monthlyPromise, analysisPromise } =
+    useLoaderData() as LoaderData;
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -46,13 +51,24 @@ export default function CategoryAnalysis() {
             pb: "25px",
           }}
         >
-          <ExpensesPieCard
-            period={dayjs()
-              .year(Context.filter.year)
-              .month(Context.filter.month)
-              .format("MMMM YYYY")}
-            data={monthly}
-          />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={monthlyPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(montlhy: DataValue[]) => (
+                <ExpensesPieCard
+                  period={dayjs()
+                    .year(Context.filter.year)
+                    .month(Context.filter.month)
+                    .format("MMMM YYYY")}
+                  data={montlhy}
+                />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
         <Grid
           size={{ md: 12, lg: 4 }}
@@ -62,10 +78,21 @@ export default function CategoryAnalysis() {
             pb: "25px",
           }}
         >
-          <ExpensesPieCard
-            period={Context.filter.year.toString()}
-            data={yearly}
-          />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={yearlyPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(yearly: DataValue[]) => (
+                <ExpensesPieCard
+                  period={Context.filter.year.toString()}
+                  data={yearly}
+                />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
         <Grid
           size={{ md: 12, lg: 4 }}
@@ -75,7 +102,18 @@ export default function CategoryAnalysis() {
             pb: "25px",
           }}
         >
-          <ExpensesPieCard period="All time" data={total} />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={totalPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(total: DataValue[]) => (
+                <ExpensesPieCard period="All time" data={total} />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
         <Grid
           size={{ xs: 12 }}
@@ -84,10 +122,21 @@ export default function CategoryAnalysis() {
             backgroundColor: colors.primary[400],
           }}
         >
-          <CategoryExpensesCard
-            year={Context.filter.year}
-            analysis={analysis}
-          />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={analysisPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(analysis: DataValue[][]) => (
+                <CategoryExpensesCard
+                  year={Context.filter.year}
+                  analysis={analysis}
+                />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
       </Grid>
     </Box>

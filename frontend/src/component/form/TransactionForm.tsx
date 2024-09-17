@@ -1,6 +1,5 @@
 import { Form, NavigateFunction, useNavigate } from "react-router-dom";
 import { Box, Button, InputLabel, Select, TextField } from "@mui/material";
-import { Transaction } from "../../model/Transaction";
 import dayjs from "dayjs";
 import {
   DatePicker,
@@ -11,9 +10,10 @@ import { Category } from "../../model/Category";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Account } from "../../model/Account";
 import { Currency } from "../../model/Currency";
+import { TransactionDto } from "../../model/TransactionDto";
 
 interface Props {
-  transaction?: Transaction;
+  transaction?: TransactionDto | null;
   categories: Category[];
   accounts: Account[];
 }

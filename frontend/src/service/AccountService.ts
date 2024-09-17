@@ -5,10 +5,15 @@ import { Amount } from "../model/Amount";
 import { Context } from "../App";
 
 export default class AccountService {
-  static async findAll(): Promise<Account[]> {
+  static async findAll(token: string): Promise<Account[]> {
     const response: AxiosResponse<Account[]> = await axios.get(
       "http://localhost:8080/api/account/",
-      { params: { currency: Context.currency } },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { currency: Context.currency },
+      },
     );
     const accounts: Account[] = [];
     response.data.forEach((account: Account) =>
@@ -17,32 +22,55 @@ export default class AccountService {
     return accounts;
   }
 
-  static async find(id: string): Promise<Account> {
+  static async find(id: string, token: string): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.get(
       `http://localhost:8080/api/account/${id}`,
-      { params: { currency: Context.currency } },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { currency: Context.currency },
+      },
     );
     return this.convertCurrencies(response.data);
   }
 
-  static async create(dto: Account): Promise<Account> {
+  static async create(dto: Account, token: string): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.post(
       "http://localhost:8080/api/account/",
       dto,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
     );
     return this.convertCurrencies(response.data);
   }
 
-  static async update(id: string, dto: Account): Promise<Account> {
+  static async update(
+    id: string,
+    dto: Account,
+    token: string,
+  ): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.put(
       `http://localhost:8080/api/account/${id}`,
       dto,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
     );
     return this.convertCurrencies(response.data);
   }
 
-  static async delete(id: string) {
-    await axios.delete(`http://localhost:8080/api/account/${id}`);
+  static async delete(id: string, token: string) {
+    await axios.delete(`http://localhost:8080/api/account/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
   private static convertCurrencies(account: Account): Account {

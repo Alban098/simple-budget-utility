@@ -13,22 +13,27 @@ import { tokens } from "../../theme";
 import Header from "../../component/Header";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import CurrencyChip from "../../component/CurrencyChip";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Await, Link, useLoaderData, useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import AccountService from "../../service/AccountService";
 import { Account } from "../../model/Account";
-import React from "react";
+import React, { Suspense } from "react";
 import { Amount } from "../../model/Amount";
+import { Context } from "../../App";
 
 interface DialogState {
   opened: boolean;
   id?: string;
 }
 
-export function loader(): Promise<Account[]> {
-  return AccountService.findAll();
+interface LoaderData {
+  accountsPromise: Promise<Account[]>;
+}
+
+export function loader(): LoaderData {
+  return { accountsPromise: AccountService.findAll(Context.apiToken) };
 }
 
 export default function AccountList() {
@@ -36,7 +41,7 @@ export default function AccountList() {
   const colors = tokens(theme.palette.mode);
 
   const navigate = useNavigate();
-  const accounts = useLoaderData() as Account[];
+  const { accountsPromise } = useLoaderData() as LoaderData;
 
   const [deleteDialog, setDeleteDialog] = React.useState({
     opened: false,
@@ -49,7 +54,7 @@ export default function AccountList() {
   const handleDeleteAccountDialog = async (confirmed: boolean, id?: string) => {
     setDeleteDialog({ opened: false, id: undefined });
     if (confirmed && id != null) {
-      await AccountService.delete(id);
+      await AccountService.delete(id, Context.apiToken);
       navigate(".", { replace: true });
     }
   };
@@ -168,12 +173,35 @@ export default function AccountList() {
         </Button>
       </Box>
       <Box m="40px 0 0 0" height="75vh">
-        <DataGrid
-          rows={accounts}
-          columns={columns}
-          isRowSelectable={() => false}
-          getRowHeight={() => "auto"}
-        />
+        <Suspense
+          fallback={
+            <DataGrid
+              loading
+              columns={columns}
+              slotProps={{
+                loadingOverlay: {
+                  noRowsVariant: "skeleton",
+                },
+              }}
+            />
+          }
+        >
+          <Await
+            resolve={accountsPromise}
+            errorElement={
+              <Alert severity="error">Error loading Data from API</Alert>
+            }
+          >
+            {(accounts: Account[]) => (
+              <DataGrid
+                rows={accounts}
+                columns={columns}
+                isRowSelectable={() => false}
+                getRowHeight={() => "auto"}
+              />
+            )}
+          </Await>
+        </Suspense>
       </Box>
       <Dialog
         open={deleteDialog.opened}

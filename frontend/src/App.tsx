@@ -1,5 +1,11 @@
 import { ColorModeContext, useMode } from "./theme";
-import { Box, CssBaseline, Theme, ThemeProvider } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  CssBaseline,
+  Theme,
+  ThemeProvider,
+} from "@mui/material";
 import Topbar from "./component/Topbar";
 import Sidebar from "./component/Sidebar";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
@@ -29,7 +35,9 @@ import TransactionCreate, {
 } from "./scenes/transaction/create";
 import dayjs from "dayjs";
 import { Currency } from "./model/Currency";
+import { useAuth } from "react-oidc-context";
 
+// Maybe this is bad, but it works :/
 export const Context = {
   filter: {
     accountId: "-1",
@@ -37,15 +45,16 @@ export const Context = {
     year: dayjs().year(),
   },
   currency: Currency.EUR,
+  apiToken: "",
 };
 
-const router = createBrowserRouter([
+const routes = [
   {
     element: <Layout />,
     loader: accountLoader,
     children: [
       {
-        path: "/",
+        path: "/dashboard",
         element: <Dashboard />,
         loader: summaryAnalysisLoader,
       },
@@ -95,10 +104,59 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  const auth = useAuth();
+
+  switch (auth.activeNavigator) {
+    case "signinSilent":
+      return (
+        <CircularProgress
+          size={70}
+          sx={{
+            position: "fixed",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 2,
+          }}
+        />
+      );
+  }
+
+  if (auth.isLoading) {
+    return (
+      <CircularProgress
+        size={70}
+        sx={{
+          position: "fixed",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 2,
+        }}
+      />
+    );
+  }
+
+  if (auth.error) {
+    return (
+      <div>
+        Oops, something happened during the login process ...{" "}
+        {auth.error.message}
+      </div>
+    );
+  }
+
+  if (auth.isAuthenticated) {
+    Context.apiToken = auth.user?.access_token ? auth.user?.access_token : "";
+    const router = createBrowserRouter(routes);
+    return <RouterProvider router={router} />;
+  }
+  Context.apiToken = "";
+  auth.signinRedirect().then();
+  return <></>;
 }
 
 function Layout() {
@@ -106,7 +164,6 @@ function Layout() {
     Theme,
     { toggleColorMode: () => void },
   ];
-
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>

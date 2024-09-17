@@ -3,35 +3,36 @@ import Header from "../../component/Header";
 import { useLoaderData } from "react-router-dom";
 import AccountService from "../../service/AccountService";
 import AccountForm from "../../component/form/AccountForm";
-import { redirect } from "react-router-dom";
+import { redirect, Params } from "react-router-dom";
 import { Account } from "../../model/Account";
+import { Context } from "../../App";
 
-interface AccountParameters {
-  id: string;
-}
-
-interface LoaderParameters {
-  params: AccountParameters;
-}
-
-interface ActionParameters {
-  params: AccountParameters;
-  request: Request;
-}
-
-export async function loader({ params }: LoaderParameters): Promise<Account> {
-  return AccountService.find(params.id);
+export async function loader({
+  params,
+}: {
+  params: Params<"id">;
+}): Promise<Account | null> {
+  if (params.id !== undefined) {
+    return await AccountService.find(params.id, Context.apiToken);
+  }
+  return null;
 }
 
 export async function action({
   request,
   params,
-}: ActionParameters): Promise<Response> {
+}: {
+  request: Request;
+  params: Params<"id">;
+}): Promise<Response> {
   const formData = await request.formData();
-  await AccountService.update(
-    params.id,
-    Object.fromEntries(formData) as unknown as Account,
-  );
+  if (params.id !== undefined) {
+    await AccountService.update(
+      params.id,
+      Object.fromEntries(formData) as unknown as Account,
+      Context.apiToken,
+    );
+  }
   return redirect("/account");
 }
 

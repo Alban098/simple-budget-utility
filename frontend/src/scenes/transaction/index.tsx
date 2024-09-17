@@ -7,33 +7,39 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
-  Typography,
   useTheme,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../component/Header";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import CurrencyChip from "../../component/CurrencyChip";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Await, Link, useLoaderData, useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Amount } from "../../model/Amount";
-import { Account } from "../../model/Account";
 import { Category } from "../../model/Category";
 import { Transaction } from "../../model/Transaction";
-import { chfTo, Currency, eurTo, usdTo } from "../../model/Currency";
 import TransactionService from "../../service/TransactionService";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import { Context } from "../../App";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 type DialogState = {
   opened: boolean;
   id?: string;
 };
 
-export async function loader(): Promise<Transaction[]> {
-  return await TransactionService.findByAccount(Context.filter.accountId);
+interface LoaderData {
+  transactionsPromise: Promise<Transaction[]>;
+}
+
+export function loader(): LoaderData {
+  return {
+    transactionsPromise: TransactionService.findByAccount(
+      Context.apiToken,
+      Context.filter.accountId,
+    ),
+  };
 }
 
 export default function TransactionList() {
@@ -41,7 +47,7 @@ export default function TransactionList() {
   const colors = tokens(theme.palette.mode);
 
   const navigate = useNavigate();
-  const transactions = useLoaderData() as Transaction[];
+  const { transactionsPromise } = useLoaderData() as LoaderData;
 
   const [deleteDialog, setDeleteDialog] = useState({
     opened: false,
@@ -57,35 +63,9 @@ export default function TransactionList() {
   ) => {
     setDeleteDialog({ opened: false, id: undefined });
     if (confirmed && id != null) {
-      await TransactionService.delete(id);
+      await TransactionService.delete(id, Context.apiToken);
       navigate(".", { replace: true });
     }
-  };
-
-  const getAmount = (amounts: Amount[]) => {
-    let total = 0;
-    amounts.forEach((amount) => {
-      switch (amount.currency) {
-        case Currency.EUR:
-          total += eurTo(amount.value, Context.currency);
-          break;
-        case Currency.CHF:
-          total += chfTo(amount.value, Context.currency);
-          break;
-        case Currency.USD:
-          total += usdTo(amount.value, Context.currency);
-          break;
-      }
-    });
-    return total;
-  };
-
-  const renderCategory = (category: Category) => {
-    return (
-      <Typography sx={{ color: colors.greenAccent[400] }}>
-        {category.name}
-      </Typography>
-    );
   };
 
   const renderAmounts = (id: string, amounts: Amount[]) => {
@@ -130,7 +110,6 @@ export default function TransactionList() {
       headerName: "Account",
       resizable: false,
       width: 180,
-      valueGetter: (account: Account) => account.name,
       cellClassName: "account-column--cell",
     },
     {
@@ -138,14 +117,14 @@ export default function TransactionList() {
       headerName: "Category",
       resizable: false,
       width: 200,
-      valueGetter: (category: Category) => category.name,
-      renderCell: ({ row: { category } }) => renderCategory(category),
+      cellClassName: "category-column--cell",
     },
     {
       field: "description",
       headerName: "Description",
       resizable: false,
       flex: 1,
+      valueGetter: (category: Category) => category.name,
       cellClassName: "desc-column--cell",
     },
     {
@@ -154,7 +133,6 @@ export default function TransactionList() {
       resizable: false,
       width: 180,
       type: "number",
-      valueGetter: (amounts) => getAmount(amounts),
       renderCell: ({ row: { id, amounts } }) => renderAmounts(id, amounts),
     },
     {
@@ -186,6 +164,10 @@ export default function TransactionList() {
           color: colors.redAccent[300],
           fontWeight: "bold",
         },
+        "& .category-column--cell": {
+          color: colors.greenAccent[400],
+          fontWeight: "bold",
+        },
         "& .MuiDataGrid-columnHeader": {
           backgroundColor: colors.blueAccent[700],
           borderBottom: "none",
@@ -215,21 +197,51 @@ export default function TransactionList() {
         </Button>
       </Box>
       <Box m="40px 0 0 0" height="75vh">
-        <DataGrid
-          isRowSelectable={() => false}
-          getRowHeight={() => "auto"}
-          rows={transactions}
-          columns={columns}
-          slots={{ toolbar: GridToolbar }}
-          disableColumnSelector
-          slotProps={{
-            toolbar: {
-              printOptions: { disableToolbarButton: true },
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 250 },
-            },
-          }}
-        />
+        <Suspense
+          fallback={
+            <DataGrid
+              loading
+              columns={columns}
+              slots={{ toolbar: GridToolbar }}
+              disableColumnSelector
+              slotProps={{
+                toolbar: {
+                  printOptions: { disableToolbarButton: true },
+                  showQuickFilter: true,
+                  quickFilterProps: { debounceMs: 250 },
+                },
+                loadingOverlay: {
+                  noRowsVariant: "skeleton",
+                },
+              }}
+            />
+          }
+        >
+          <Await
+            resolve={transactionsPromise}
+            errorElement={
+              <Alert severity="error">Error loading Data from API</Alert>
+            }
+          >
+            {(transactions: Transaction[]) => (
+              <DataGrid
+                isRowSelectable={() => false}
+                getRowHeight={() => "auto"}
+                rows={transactions}
+                columns={columns}
+                slots={{ toolbar: GridToolbar }}
+                disableColumnSelector
+                slotProps={{
+                  toolbar: {
+                    printOptions: { disableToolbarButton: true },
+                    showQuickFilter: true,
+                    quickFilterProps: { debounceMs: 250 },
+                  },
+                }}
+              />
+            )}
+          </Await>
+        </Suspense>
       </Box>
       <Dialog
         open={deleteDialog.opened}

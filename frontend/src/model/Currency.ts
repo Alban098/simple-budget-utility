@@ -6,36 +6,6 @@ export enum Currency {
   USD = "USD",
 }
 
-export function chfTo(chf: number, to: Currency): number {
-  switch (to) {
-    case Currency.EUR:
-      return chf * 1.0579;
-    case Currency.USD:
-      return chf * 1.1706;
-  }
-  return chf;
-}
-
-export function eurTo(eur: number, to: Currency): number {
-  switch (to) {
-    case Currency.CHF:
-      return eur / 1.0579;
-    case Currency.USD:
-      return eur * 1.11;
-  }
-  return eur;
-}
-
-export function usdTo(usd: number, to: Currency): number {
-  switch (to) {
-    case Currency.EUR:
-      return usd / 1.11;
-    case Currency.CHF:
-      return usd / 1.1706;
-  }
-  return usd;
-}
-
 export function format(
   amount: number,
   currency: Currency = Context.currency,

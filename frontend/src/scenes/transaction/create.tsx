@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import Header from "../../component/Header";
 import { redirect, useLoaderData } from "react-router-dom";
-import { Transaction } from "../../model/Transaction";
 import TransactionService from "../../service/TransactionService";
 import TransactionForm from "../../component/form/TransactionForm";
 import CategoryService from "../../service/CategoryService";
@@ -10,6 +9,8 @@ import { Category } from "../../model/Category";
 import { Account } from "../../model/Account";
 import { Currency } from "../../model/Currency";
 import { Amount } from "../../model/Amount";
+import { TransactionDto } from "../../model/TransactionDto";
+import { Context } from "../../App";
 
 interface ActionParameters {
   request: Request;
@@ -36,8 +37,11 @@ export async function action({ request }: ActionParameters): Promise<Response> {
     formData,
   ) as unknown as TransactionFormData;
 
-  const transaction = {} as Transaction;
-  transaction.category = await CategoryService.find(entries.categoryId);
+  const transaction = {} as TransactionDto;
+  transaction.category = await CategoryService.find(
+    entries.categoryId,
+    Context.apiToken,
+  );
   transaction.account = { id: entries.accountId } as Account;
   transaction.date = entries.date;
   transaction.description = entries.description;
@@ -47,14 +51,14 @@ export async function action({ request }: ActionParameters): Promise<Response> {
     { value: entries.amountUsd, currency: Currency.USD } as Amount,
   ];
 
-  await TransactionService.create(transaction);
+  await TransactionService.create(transaction, Context.apiToken);
   return redirect("/transaction");
 }
 
 export async function loader(): Promise<LoaderData> {
   return {
-    categories: await CategoryService.findAll(),
-    accounts: await AccountService.findAll(),
+    categories: await CategoryService.findAll(Context.apiToken),
+    accounts: await AccountService.findAll(Context.apiToken),
   };
 }
 

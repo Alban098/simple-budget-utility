@@ -1,7 +1,7 @@
 import Header from "../../component/Header";
 import { Box, useTheme } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { useLoaderData } from "react-router-dom";
+import { Await, useLoaderData } from "react-router-dom";
 import { tokens } from "../../theme";
 import AnalysisService from "../../service/AnalysisService";
 import { DataLine, DataValue } from "../../model/AnalysisObject";
@@ -9,20 +9,26 @@ import IncomeExpenseCard from "../../component/card/IncomeExpenseCard";
 import NetWorthGraphCard from "../../component/card/NetWorthGraphCard";
 import NetWorthCard from "../../component/card/NetWorthCard";
 import { Context } from "../../App";
+import { Suspense } from "react";
+import LoadingCard from "../../component/card/LoadingCard";
 
 interface LoaderData {
-  netWorth: DataValue[];
-  netWorthAllTime: DataLine[];
-  netWorkYearly: DataLine[];
-  incomesExpenses: DataValue[][];
+  netWorthPromise: Promise<DataValue[]>;
+  netWorthAllTimePromise: Promise<DataLine[]>;
+  netWorkYearlyPromise: Promise<DataLine[]>;
+  incomesExpensesPromise: Promise<DataValue[][]>;
 }
 
-export async function loader(): Promise<LoaderData> {
+export function loader(): LoaderData {
   return {
-    netWorth: await AnalysisService.netWorthInstant(),
-    netWorthAllTime: await AnalysisService.netWorthAnalysis(),
-    netWorkYearly: await AnalysisService.netWorthYearlyAnalysis(),
-    incomesExpenses: await AnalysisService.incomeExpenseAnalysis(),
+    netWorthPromise: AnalysisService.netWorthInstant(Context.apiToken),
+    netWorthAllTimePromise: AnalysisService.netWorthAnalysis(Context.apiToken),
+    netWorkYearlyPromise: AnalysisService.netWorthYearlyAnalysis(
+      Context.apiToken,
+    ),
+    incomesExpensesPromise: AnalysisService.incomeExpenseAnalysis(
+      Context.apiToken,
+    ),
   };
 }
 
@@ -62,8 +68,12 @@ function formatYearlyTimeAxis(line?: DataLine): string[] | undefined {
 }
 
 export default function Dashboard() {
-  const { netWorth, netWorthAllTime, netWorkYearly, incomesExpenses } =
-    useLoaderData() as LoaderData;
+  const {
+    netWorthPromise,
+    netWorthAllTimePromise,
+    netWorkYearlyPromise,
+    incomesExpensesPromise,
+  } = useLoaderData() as LoaderData;
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -81,7 +91,16 @@ export default function Dashboard() {
             backgroundColor: colors.primary[400],
           }}
         >
-          <NetWorthCard netWorth={netWorth} />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={netWorthPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(netWorth: DataValue[]) => <NetWorthCard netWorth={netWorth} />}
+            </Await>
+          </Suspense>
         </Grid>
         <Grid
           size={{ lg: 12, xl: 6 }}
@@ -90,14 +109,25 @@ export default function Dashboard() {
             backgroundColor: colors.primary[400],
           }}
         >
-          <NetWorthGraphCard
-            period="All time"
-            subtitle="By month"
-            analysis={netWorthAllTime}
-            axisLabels={formatAllTimeAxis(
-              netWorthAllTime.find((l) => l.label === "Total"),
-            )}
-          />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={netWorthAllTimePromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(netWorthAllTime: DataLine[]) => (
+                <NetWorthGraphCard
+                  period="All time"
+                  subtitle="By month"
+                  analysis={netWorthAllTime}
+                  axisLabels={formatAllTimeAxis(
+                    netWorthAllTime.find((l) => l.label === "Total"),
+                  )}
+                />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
         <Grid
           size={{ lg: 12, xl: 6 }}
@@ -106,14 +136,25 @@ export default function Dashboard() {
             backgroundColor: colors.primary[400],
           }}
         >
-          <NetWorthGraphCard
-            analysis={netWorkYearly}
-            period={Context.filter.year.toString()}
-            subtitle="By week"
-            axisLabels={formatYearlyTimeAxis(
-              netWorkYearly.find((l) => l.label === "Total"),
-            )}
-          />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={netWorkYearlyPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(netWorkYearly: DataLine[]) => (
+                <NetWorthGraphCard
+                  analysis={netWorkYearly}
+                  period={Context.filter.year.toString()}
+                  subtitle="By week"
+                  axisLabels={formatYearlyTimeAxis(
+                    netWorkYearly.find((l) => l.label === "Total"),
+                  )}
+                />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
         <Grid
           size={{ xs: 12 }}
@@ -122,10 +163,21 @@ export default function Dashboard() {
             backgroundColor: colors.primary[400],
           }}
         >
-          <IncomeExpenseCard
-            year={Context.filter.year}
-            analysis={incomesExpenses}
-          />
+          <Suspense fallback={<LoadingCard />}>
+            <Await
+              resolve={incomesExpensesPromise}
+              errorElement={
+                <Alert severity="error">Error loading Data from API</Alert>
+              }
+            >
+              {(incomesExpenses: DataValue[][]) => (
+                <IncomeExpenseCard
+                  year={Context.filter.year}
+                  analysis={incomesExpenses}
+                />
+              )}
+            </Await>
+          </Suspense>
         </Grid>
       </Grid>
     </Box>
