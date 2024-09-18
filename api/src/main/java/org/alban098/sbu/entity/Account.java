@@ -41,10 +41,6 @@ public class Account {
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   private Collection<Amount> amounts = new ArrayList<>();
 
-  @Setter
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private Amount amount;
-
   @OneToMany(
       cascade = CascadeType.ALL,
       fetch = FetchType.LAZY,
@@ -55,30 +51,5 @@ public class Account {
   public Account(String name, String description) {
     this.name = name;
     this.description = description;
-  }
-
-  public void setTransactions(Collection<Transaction> transactions) {
-    this.transactions.clear();
-    this.transactions.addAll(transactions);
-  }
-
-  public void removeTransaction(Transaction transaction) {
-    this.transactions.remove(transaction);
-    transaction.setAccount(null);
-  }
-
-  public void removeTransactions(Collection<Transaction> transactions) {
-    this.transactions.removeAll(transactions);
-    transactions.forEach(t -> t.setAccount(null));
-  }
-
-  public void addTransaction(Transaction transaction) {
-    this.transactions.add(transaction);
-    transaction.setAccount(this);
-  }
-
-  public void addTransactions(Collection<Transaction> transactions) {
-    this.transactions.addAll(transactions);
-    transactions.forEach(t -> t.setAccount(this));
   }
 }

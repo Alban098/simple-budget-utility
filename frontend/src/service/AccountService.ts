@@ -5,14 +5,14 @@ import { Amount } from "../model/Amount";
 import { Context } from "../App";
 
 export default class AccountService {
-  static async findAll(token: string): Promise<Account[]> {
+  static async findAll(token: string, shallow: boolean): Promise<Account[]> {
     const response: AxiosResponse<Account[]> = await axios.get(
       "http://localhost:8080/api/account/",
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: { currency: Context.currency },
+        params: { currency: Context.currency, shallow: shallow },
       },
     );
     const accounts: Account[] = [];
@@ -22,14 +22,18 @@ export default class AccountService {
     return accounts;
   }
 
-  static async find(id: string, token: string): Promise<Account> {
+  static async find(
+    id: string,
+    shallow: boolean,
+    token: string,
+  ): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.get(
       `http://localhost:8080/api/account/${id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: { currency: Context.currency },
+        params: { currency: Context.currency, shallow: shallow },
       },
     );
     return this.convertCurrencies(response.data);

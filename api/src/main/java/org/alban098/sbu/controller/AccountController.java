@@ -26,17 +26,19 @@ public class AccountController {
   }
 
   @GetMapping("/")
-  public ResponseEntity<Collection<AccountDto>> list(@RequestParam Currency currency) {
+  public ResponseEntity<Collection<AccountDto>> list(
+      @RequestParam Currency currency, @RequestParam boolean shallow) {
     Collection<Account> accounts = accountService.getAccountsOfUser();
-    Collection<AccountDto> accountDtos = accountService.createDtos(accounts, currency);
+    Collection<AccountDto> accountDtos = accountService.createDtos(accounts, currency, shallow);
     return ResponseEntity.ok(accountDtos);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<AccountDto> show(@PathVariable String id, @RequestParam Currency currency) {
+  public ResponseEntity<AccountDto> show(
+      @PathVariable String id, @RequestParam Currency currency, @RequestParam boolean shallow) {
     Account account = accountService.getAccount(id);
     accountService.checkAccount(account);
-    AccountDto accountDto = accountService.createDto(account, currency);
+    AccountDto accountDto = accountService.createDto(account, currency, shallow);
     return ResponseEntity.ok(accountDto);
   }
 

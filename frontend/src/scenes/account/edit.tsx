@@ -13,7 +13,7 @@ export async function loader({
   params: Params<"id">;
 }): Promise<Account | null> {
   if (params.id !== undefined) {
-    return await AccountService.find(params.id, Context.apiToken);
+    return await AccountService.find(params.id, true, Context.apiToken);
   }
   return null;
 }

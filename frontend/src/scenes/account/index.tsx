@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -33,7 +34,11 @@ interface LoaderData {
 }
 
 export function loader(): LoaderData {
-  return { accountsPromise: AccountService.findAll(Context.apiToken) };
+  return { accountsPromise: AccountService.findAll(Context.apiToken, false) };
+}
+
+export function loaderShallow(): LoaderData {
+  return { accountsPromise: AccountService.findAll(Context.apiToken, true) };
 }
 
 export default function AccountList() {

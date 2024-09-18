@@ -39,7 +39,7 @@ export async function loader({
         ? null
         : await TransactionService.find(params.id, Context.apiToken),
     categories: await CategoryService.findAll(Context.apiToken),
-    accounts: await AccountService.findAll(Context.apiToken),
+    accounts: await AccountService.findAll(Context.apiToken, true),
   } as LoaderData;
 }
 

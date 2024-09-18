@@ -9,7 +9,10 @@ import {
 import Topbar from "./component/Topbar";
 import Sidebar from "./component/Sidebar";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import Accounts, { loader as accountLoader } from "./scenes/account";
+import Accounts, {
+  loader as accountLoader,
+  loaderShallow as accountLoaderShallow,
+} from "./scenes/account";
 import Transaction, { loader as transactionLoader } from "./scenes/transaction";
 import AccountEdit, {
   loader as editAccountLoader,
@@ -36,6 +39,10 @@ import TransactionCreate, {
 import dayjs from "dayjs";
 import { Currency } from "./model/Currency";
 import { useAuth } from "react-oidc-context";
+import TransactionImport, {
+  action as importTransactionAction,
+} from "./scenes/import/import";
+import TransactionImportMap from "./scenes/import/map";
 
 // Maybe this is bad, but it works :/
 export const Context = {
@@ -51,10 +58,10 @@ export const Context = {
 const routes = [
   {
     element: <Layout />,
-    loader: accountLoader,
+    loader: accountLoaderShallow,
     children: [
       {
-        path: "/dashboard",
+        path: "/",
         element: <Dashboard />,
         loader: summaryAnalysisLoader,
       },
@@ -74,6 +81,16 @@ const routes = [
         path: "/transaction",
         element: <Transaction />,
         loader: transactionLoader,
+      },
+      {
+        path: "/transaction/import",
+        element: <TransactionImport />,
+        loader: accountLoaderShallow,
+        action: importTransactionAction,
+      },
+      {
+        path: "/transaction/import/map",
+        element: <TransactionImportMap />,
       },
       {
         path: "/transaction/create",

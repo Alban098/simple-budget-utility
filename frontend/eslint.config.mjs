@@ -6,6 +6,13 @@ import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended"
 
 export default [
   {
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
+  },
+  {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     plugins: { pluginReact },
   },

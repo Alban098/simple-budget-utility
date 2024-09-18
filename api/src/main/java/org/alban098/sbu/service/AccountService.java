@@ -69,20 +69,24 @@ public class AccountService {
     accountDto.setId(account.getId());
     accountDto.setName(account.getName());
     accountDto.setDescription(account.getDescription());
-    return accountDto;
-  }
-
-  public AccountDto createDto(Account account, Currency currency) {
-    AccountDto accountDto = createDto(account);
     computeBalance(account).forEach(accountDto::setBalance);
-    accountDto.setAmount(computeTotal(accountDto, currency));
     return accountDto;
   }
 
-  public Collection<AccountDto> createDtos(Iterable<Account> Account, Currency currency) {
+  public AccountDto createDto(Account account, Currency currency, boolean skipBalance) {
+    AccountDto accountDto = createDto(account);
+    if (!skipBalance) {
+      computeBalance(account).forEach(accountDto::setBalance);
+      accountDto.setAmount(computeTotal(accountDto, currency));
+    }
+    return accountDto;
+  }
+
+  public Collection<AccountDto> createDtos(
+      Iterable<Account> Account, Currency currency, boolean skipBalance) {
     Collection<AccountDto> dtos = new ArrayList<>();
     for (Account account : Account) {
-      dtos.add(createDto(account, currency));
+      dtos.add(createDto(account, currency, skipBalance));
     }
     return dtos;
   }

@@ -6,6 +6,26 @@ import { Context } from "../App";
 import { TransactionDto } from "../model/TransactionDto";
 
 export default class TransactionService {
+  static async import(
+    formData: FormData,
+    token: string,
+  ): Promise<Transaction[]> {
+    const response: AxiosResponse<Transaction[]> = await axios.post(
+      "http://localhost:8080/api/transaction/import/",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const transactions: Transaction[] = [];
+    response.data.forEach((transaction: Transaction) =>
+      transactions.push(this.convert(transaction)),
+    );
+    return transactions;
+  }
+
   static async findAll(token: string): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.get(
       "http://localhost:8080/api/transaction/",

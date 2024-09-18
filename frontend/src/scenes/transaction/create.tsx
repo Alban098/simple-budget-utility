@@ -58,7 +58,7 @@ export async function action({ request }: ActionParameters): Promise<Response> {
 export async function loader(): Promise<LoaderData> {
   return {
     categories: await CategoryService.findAll(Context.apiToken),
-    accounts: await AccountService.findAll(Context.apiToken),
+    accounts: await AccountService.findAll(Context.apiToken, true),
   };
 }
 

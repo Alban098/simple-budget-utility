@@ -12,3 +12,7 @@ node_modules/
 api/src/main/resources/static/
 
 frontend/.env
+
+frontend/dist/assets/
+
+frontend/dist/

@@ -92,7 +92,7 @@ export default function Sidebar() {
           <Box paddingLeft={isCollapsed ? undefined : "5%"}>
             <Item
               title="Dashboard"
-              to="/dashboard"
+              to="/"
               icon={<QueryStatsIcon />}
               location={location.pathname}
             />
