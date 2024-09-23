@@ -24,6 +24,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.session:spring-session-core")
   implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
+  implementation("org.apache.pdfbox:pdfbox:3.0.3")
   implementation("org.projectlombok:lombok")
   implementation("com.google.code.gson:gson:2.11.0")
   annotationProcessor("org.projectlombok:lombok")

@@ -69,7 +69,6 @@ public class AccountService {
     accountDto.setId(account.getId());
     accountDto.setName(account.getName());
     accountDto.setDescription(account.getDescription());
-    computeBalance(account).forEach(accountDto::setBalance);
     return accountDto;
   }
 

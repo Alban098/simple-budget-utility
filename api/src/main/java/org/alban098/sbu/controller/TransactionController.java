@@ -7,15 +7,20 @@
  */
 package org.alban098.sbu.controller;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.Collection;
-import org.alban098.sbu.dto.ImportDto;
-import org.alban098.sbu.dto.TransactionDto;
-import org.alban098.sbu.dto.TransactionUpdateDto;
+import java.util.List;
+
+import org.alban098.sbu.dto.*;
 import org.alban098.sbu.entity.Account;
+import org.alban098.sbu.entity.Bank;
 import org.alban098.sbu.entity.Transaction;
 import org.alban098.sbu.service.AccountService;
+import org.alban098.sbu.service.AccountStatementImportService;
+import org.alban098.sbu.service.CategoryService;
 import org.alban098.sbu.service.TransactionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +32,13 @@ public class TransactionController {
 
   private final TransactionService transactionService;
   private final AccountService accountService;
+  private final AccountStatementImportService accountStatementImportService;
 
   public TransactionController(
-      TransactionService transactionService, AccountService accountService) {
+          TransactionService transactionService, AccountService accountService, AccountStatementImportService accountStatementImportService) {
     this.transactionService = transactionService;
     this.accountService = accountService;
+    this.accountStatementImportService = accountStatementImportService;
   }
 
   @GetMapping("/")
@@ -41,17 +48,17 @@ public class TransactionController {
       Account account = accountService.getAccount(accountId);
       accountService.checkAccount(account);
       Iterable<Transaction> transactions = transactionService.getTransactionsOfAccount(account);
-      return ResponseEntity.ok(transactionService.createDtos(transactions));
+      return ResponseEntity.ok(transactionService.createDtos(transactions, false));
     }
     Iterable<Transaction> transactions = transactionService.getTransactionsOfUser();
-    return ResponseEntity.ok(transactionService.createDtos(transactions));
+    return ResponseEntity.ok(transactionService.createDtos(transactions, false));
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<TransactionDto> show(@PathVariable String id) {
     Transaction transaction = transactionService.getTransaction(id);
     transactionService.checkTransaction(transaction);
-    return ResponseEntity.ok(transactionService.createDto(transaction));
+    return ResponseEntity.ok(transactionService.createDto(transaction, false));
   }
 
   @PostMapping("/")
@@ -59,24 +66,30 @@ public class TransactionController {
       throws URISyntaxException {
     Transaction transaction = transactionService.create(transactionDto);
     return ResponseEntity.created(new URI("/api/transaction/" + transaction.getId()))
-        .body(transactionService.createDto(transaction));
+        .body(transactionService.createDto(transaction, false));
   }
 
   @PostMapping(
-      path = "/import/",
+      path = "/import",
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  public ResponseEntity<Collection<TransactionDto>> create(@ModelAttribute ImportDto importDto)
-      throws URISyntaxException {
-    // Placeholder for import
-    Iterable<Transaction> transactions = transactionService.getTransactionsOfUser();
-    return ResponseEntity.ok(transactionService.createDtos(transactions));
+  public ResponseEntity<Collection<TransactionDto>> importTransaction(@ModelAttribute ImportDto importDto)
+          throws IOException, ParseException {
+    Account account = accountService.getAccount(importDto.getAccount());
+    Collection<Transaction> transactions = accountStatementImportService.importTransactions(Bank.LBP, account, importDto.getFile().getBytes());
+    return ResponseEntity.ok(transactionService.createDtos(transactions, true));
+  }
+
+  @PostMapping("/import/finalize")
+  public ResponseEntity<Collection<TransactionDto>> finalizeImport(@RequestBody TransactionDto[] transactions) {
+    List<Transaction> savedTransactions = transactionService.importTransactions(transactions);
+    return ResponseEntity.ok(transactionService.createDtos(savedTransactions, false));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<TransactionDto> update(
       @PathVariable String id, @RequestBody TransactionUpdateDto transactionDto) {
     Transaction transaction = transactionService.update(id, transactionDto);
-    return ResponseEntity.ok(transactionService.createDto(transaction));
+    return ResponseEntity.ok(transactionService.createDto(transaction, false));
   }
 
   @DeleteMapping("/{id}")

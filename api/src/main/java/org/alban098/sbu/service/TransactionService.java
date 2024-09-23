@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.alban098.sbu.dto.*;
@@ -152,23 +153,25 @@ public class TransactionService {
     }
   }
 
-  public TransactionDto createDto(Transaction transaction) {
+  public TransactionDto createDto(Transaction transaction, boolean ids) {
     TransactionDto transactionDto = new TransactionDto();
     transactionDto.setId(transaction.getId());
     transactionDto.setDate(transaction.getDate());
     transactionDto.setDescription(transaction.getDescription());
-    transactionDto.setCategory(transaction.getCategory().getName());
-    transactionDto.setAccount(transaction.getAccount().getName());
+    if (transaction.getCategory() != null) {
+      transactionDto.setCategory(ids ? transaction.getCategory().getId() : transaction.getCategory().getName());
+    }
+    transactionDto.setAccount(ids ? transaction.getAccount().getId() : transaction.getAccount().getName());
     transaction.getAmounts().stream()
         .filter(amount -> amount != null && amount.getValue() != null && amount.getValue() != 0)
         .forEach(amount -> transactionDto.setAmount(amount.getCurrency(), amount.getValue()));
     return transactionDto;
   }
 
-  public Collection<TransactionDto> createDtos(Iterable<Transaction> transactions) {
+  public Collection<TransactionDto> createDtos(Iterable<Transaction> transactions, boolean ids) {
     Collection<TransactionDto> dtos = new ArrayList<>();
     for (Transaction transaction : transactions) {
-      dtos.add(createDto(transaction));
+      dtos.add(createDto(transaction, ids));
     }
     return dtos;
   }
@@ -191,5 +194,23 @@ public class TransactionService {
       return transaction.get().getDate();
     }
     return LocalDate.now();
+  }
+
+  public List<Transaction> importTransactions(TransactionDto[] transactions) {
+    List<Transaction> savedTransactions = new ArrayList<>();
+    for (TransactionDto transactionDto : transactions) {
+      AccountDto account = accountService.createDto(accountService.getAccount(transactionDto.getAccount()));
+      CategoryDto category = categoryService.createDto(categoryService.getCategory(transactionDto.getCategory()));
+      TransactionUpdateDto transactionUpdateDto = new TransactionUpdateDto();
+      transactionUpdateDto.setDate(transactionDto.getDate());
+      transactionUpdateDto.setCategory(category);
+      transactionUpdateDto.setAccount(account);
+      transactionUpdateDto.setDescription(transactionDto.getDescription());
+      for (AmountDto amount : transactionDto.getAmounts()) {
+        transactionUpdateDto.setAmount(amount.getCurrency(), amount.getValue());
+      }
+      savedTransactions.add(create(transactionUpdateDto));
+    }
+    return savedTransactions;
   }
 }

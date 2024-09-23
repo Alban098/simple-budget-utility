@@ -25,13 +25,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class UserHandlingInterceptor implements HandlerInterceptor {
 
   private final UserRepository repository;
-  private final SessionFactory sessionFactory;
   private final String contextPath;
 
   public UserHandlingInterceptor(
-      UserRepository repository, SessionFactory sessionFactory, String contextPath) {
+      UserRepository repository, String contextPath) {
     this.repository = repository;
-    this.sessionFactory = sessionFactory;
     this.contextPath = contextPath;
   }
 

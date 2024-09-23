@@ -8,6 +8,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Typography,
   useTheme,
 } from "@mui/material";
 import { tokens } from "../../theme";
@@ -18,7 +19,6 @@ import { Await, Link, useLoaderData, useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Amount } from "../../model/Amount";
-import { Category } from "../../model/Category";
 import { Transaction } from "../../model/Transaction";
 import TransactionService from "../../service/TransactionService";
 import AddCardIcon from "@mui/icons-material/AddCard";
@@ -119,13 +119,15 @@ export default function TransactionList() {
       resizable: false,
       width: 200,
       cellClassName: "category-column--cell",
+      renderCell: ({ row: { category } }) => (
+        <Typography> {category} </Typography>
+      ),
     },
     {
       field: "description",
       headerName: "Description",
       resizable: false,
       flex: 1,
-      valueGetter: (category: Category) => category.name,
       cellClassName: "desc-column--cell",
     },
     {
@@ -146,6 +148,7 @@ export default function TransactionList() {
       renderCell: ({ row: { id } }) => renderActions(id),
     },
   ];
+
   return (
     <Box
       m="20px 40px"

@@ -11,7 +11,7 @@ export default class TransactionService {
     token: string,
   ): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.post(
-      "http://localhost:8080/api/transaction/import/",
+      "http://localhost:8080/api/transaction/import",
       formData,
       {
         headers: {
@@ -24,6 +24,26 @@ export default class TransactionService {
       transactions.push(this.convert(transaction)),
     );
     return transactions;
+  }
+
+  static async finalizeImport(
+    transactions: Transaction[],
+    token: string,
+  ): Promise<Transaction[]> {
+    const response: AxiosResponse<Transaction[]> = await axios.post(
+      "http://localhost:8080/api/transaction/import/finalize",
+      transactions,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const saved: Transaction[] = [];
+    response.data.forEach((transaction: Transaction) =>
+      saved.push(this.convert(transaction)),
+    );
+    return saved;
   }
 
   static async findAll(token: string): Promise<Transaction[]> {

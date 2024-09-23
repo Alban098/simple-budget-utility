@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.alban098.sbu.utils.Currency;
 
+@Setter
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor
@@ -27,25 +28,22 @@ public class Transaction implements Comparable<Transaction> {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  @Setter
   @ManyToOne(
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},
       optional = false,
       fetch = FetchType.EAGER)
   private Account account;
 
-  @Setter
   @ManyToOne(
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},
       optional = true,
       fetch = FetchType.EAGER)
   private Category category;
 
-  @Setter @Column private LocalDate date;
+  @Column private LocalDate date;
 
-  @Setter @Column private String description;
+  @Column private String description;
 
-  @Setter
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   private Collection<Amount> amounts = new ArrayList<>();
 
@@ -81,5 +79,10 @@ public class Transaction implements Comparable<Transaction> {
       return id.compareTo(o.id);
     }
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return date.toString() + " " + description + " " + amounts.toString();
   }
 }

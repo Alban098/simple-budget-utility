@@ -20,22 +20,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class ConfigUserInterceptor implements WebMvcConfigurer {
 
   @Autowired private UserRepository userRepository;
-  @Autowired private SessionFactory sessionFactory;
   private final String contextPath;
 
   public ConfigUserInterceptor(
       UserRepository userRepository,
-      @Value("${server.servlet.context-path:}") String contextPath,
-      SessionFactory sessionFactory) {
+      @Value("${server.servlet.context-path:}") String contextPath) {
     this.userRepository = userRepository;
     this.contextPath = contextPath;
-    this.sessionFactory = sessionFactory;
   }
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry
-        .addInterceptor(new UserHandlingInterceptor(userRepository, sessionFactory, contextPath))
+        .addInterceptor(new UserHandlingInterceptor(userRepository, contextPath))
         .addPathPatterns("/**");
   }
 }

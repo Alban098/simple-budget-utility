@@ -13,6 +13,8 @@ import TransactionService from "../../service/TransactionService";
 import { Context } from "../../App";
 import { Transaction } from "../../model/Transaction";
 import ImportTransactionForm from "../../component/form/ImportTransactionForm";
+import { Category } from "../../model/Category";
+import CategoryService from "../../service/CategoryService";
 
 interface ActionParameters {
   request: Request;
@@ -22,11 +24,19 @@ interface LoaderData {
   accountsPromise: Promise<Account[]>;
 }
 
+interface ActionData {
+  categories: Category[];
+  transactions: Transaction[];
+}
+
 export async function action({
   request,
-}: ActionParameters): Promise<Transaction[]> {
+}: ActionParameters): Promise<ActionData> {
   const formData = await request.formData();
-  return await TransactionService.import(formData, Context.apiToken);
+  return {
+    categories: await CategoryService.findAll(Context.apiToken),
+    transactions: await TransactionService.import(formData, Context.apiToken),
+  };
 }
 
 export default function TransactionImport() {
@@ -45,7 +55,10 @@ export default function TransactionImport() {
 
   return (
     <Box m="20px">
-      <Header title="Import Account Statement" subtitle="Import" />
+      <Header
+        title="Import Account Statement"
+        subtitle="Account statement import 1/2"
+      />
       <Suspense
         fallback={
           <Box

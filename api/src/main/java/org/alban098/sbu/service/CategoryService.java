@@ -49,4 +49,8 @@ public class CategoryService {
     }
     return dtos;
   }
+
+  public Category findFirst() {
+    return categoryRepository.findFirstByIdNotNullOrderByIdAsc().orElse(null);
+  }
 }

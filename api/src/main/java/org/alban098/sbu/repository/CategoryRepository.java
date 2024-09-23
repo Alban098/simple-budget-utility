@@ -10,4 +10,8 @@ package org.alban098.sbu.repository;
 import org.alban098.sbu.entity.Category;
 import org.springframework.data.repository.CrudRepository;
 
-public interface CategoryRepository extends CrudRepository<Category, String> {}
+import java.util.Optional;
+
+public interface CategoryRepository extends CrudRepository<Category, String> {
+  Optional<Category> findFirstByIdNotNullOrderByIdAsc();
+}

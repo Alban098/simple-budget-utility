@@ -1,7 +1,6 @@
 import { Form, NavigateFunction, useNavigate } from "react-router-dom";
 import { Box, Button, InputLabel, Select } from "@mui/material";
 import { Account } from "../../model/Account";
-import { Banks } from "../../model/Banks";
 
 interface Props {
   accounts: Account[];
@@ -45,17 +44,18 @@ export default function ImportTransactionForm({ accounts }: Props) {
               margin: "5px",
             }}
             required={true}
-            defaultValue={Banks.YUH}
+            defaultValue="YUH"
             native={true}
             variant="filled"
             label="Bank"
-            name="type"
+            name="bank"
           >
-            {Object.values(Banks).map((bank) => (
-              <option key={bank} value={bank}>
-                {bank}
-              </option>
-            ))}
+            <option key="LBP" value="LBP">
+              La Banque Postale
+            </option>
+            <option key="YUH" value="YUH">
+              Yuh
+            </option>
           </Select>
           <InputLabel>File</InputLabel>
           <input name="file" type="file" />

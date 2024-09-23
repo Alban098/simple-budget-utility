@@ -148,7 +148,7 @@ public class AnalysisService {
                 DataValueDto value = new DataValueDto();
                 value.setValue(runningTotal[0]);
                 value.setLabel(String.valueOf(data.size()));
-                accumulateTotal(total, data.size(), value);
+                accumulateTotal(total, String.valueOf(data.size()), value);
                 data.add(value);
                 periodStartDate.set(weekDate);
               });
@@ -166,12 +166,23 @@ public class AnalysisService {
       Iterable<Account> accounts, Currency currency, LocalDate startDate, LocalDate endDate) {
     Collection<DataLineDto> response = new ArrayList<>();
     List<DataValueDto> total = new ArrayList<>();
+    LocalDate restrictedStartDate = LocalDate.now();
+    LocalDate restrictedEndDate = LocalDate.now();
+
+    for (Account account : accounts) {
+      LocalDate accountStartDate =
+              transactionService.getDateOfFirstTransaction(account, startDate, endDate).minusMonths(1);
+      LocalDate accountEndDate =
+              transactionService.getDateOfLastTransaction(account, startDate, endDate).plusMonths(1);
+      if (accountStartDate.isBefore(restrictedStartDate)) {
+        restrictedStartDate = accountStartDate;
+      }
+      if (accountEndDate.isAfter(restrictedEndDate)) {
+        restrictedEndDate = accountEndDate;
+      }
+    }
     for (Account account : accounts) {
       double runningTotal = 0;
-      LocalDate restrictedStartDate =
-          transactionService.getDateOfFirstTransaction(account, startDate, endDate).minusMonths(1);
-      LocalDate restrictedEndDate =
-          transactionService.getDateOfLastTransaction(account, startDate, endDate).plusMonths(1);
 
       DataLineDto currentAccountLine = new DataLineDto();
       currentAccountLine.setLabel(account.getName());
@@ -194,9 +205,10 @@ public class AnalysisService {
                   AggregationType.ALL);
           DataValueDto value = new DataValueDto();
           value.setValue(runningTotal);
-          value.setLabel(computeLongScaleLabel(month, year));
+          String label = computeLongScaleLabel(month, year);
+          value.setLabel(label);
 
-          accumulateTotal(total, index, value);
+          accumulateTotal(total, label, value);
           dataPoints.add(value);
           index++;
         }
@@ -211,14 +223,16 @@ public class AnalysisService {
     return response;
   }
 
-  private static void accumulateTotal(List<DataValueDto> total, int index, DataValueDto value) {
-    if (total.size() <= index) {
+  private static void accumulateTotal(List<DataValueDto> total, String label, DataValueDto value) {
+    DataValueDto dto = total.stream().filter(t -> t.getLabel().equals(label)).findFirst().orElse(null);
+    if (dto == null) {
       DataValueDto newValue = new DataValueDto();
       newValue.setLabel(value.getLabel());
-      newValue.setValue(0d);
+      newValue.setValue(value.getValue());
       total.add(newValue);
+    } else {
+      dto.setValue(dto.getValue() + value.getValue());
     }
-    total.get(index).setValue(total.get(index).getValue() + value.getValue());
   }
 
   private String computeLongScaleLabel(int month, int year) {
