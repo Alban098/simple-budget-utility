@@ -1,38 +1,39 @@
 import axios, { AxiosResponse } from "axios";
 import { Category } from "../model/Category";
+import { getUser } from "../App";
 
 export default class CategoryService {
-  static async findAll(token: string): Promise<Category[]> {
+  static async findAll(): Promise<Category[]> {
     const response: AxiosResponse<Category[]> = await axios.get(
-      "http://localhost:8080/api/category/",
+      "/api/category/",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
     return response.data;
   }
 
-  static async find(id: string, token: string): Promise<Category> {
+  static async find(id: string): Promise<Category> {
     const response: AxiosResponse<Category> = await axios.get(
-      `http://localhost:8080/api/category/${id}`,
+      `/api/category/${id}`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
     return response.data;
   }
 
-  static async create(dto: Category, token: string): Promise<Category> {
+  static async create(dto: Category): Promise<Category> {
     const response: AxiosResponse<Category> = await axios.post(
-      "http://localhost:8080/api/category/",
+      "/api/category/",
       dto,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );

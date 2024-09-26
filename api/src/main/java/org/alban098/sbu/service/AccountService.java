@@ -12,7 +12,6 @@ import lombok.AllArgsConstructor;
 import org.alban098.sbu.dto.AccountDto;
 import org.alban098.sbu.dto.AmountDto;
 import org.alban098.sbu.entity.Account;
-import org.alban098.sbu.entity.Amount;
 import org.alban098.sbu.entity.Transaction;
 import org.alban098.sbu.facade.IAuthenticationFacade;
 import org.alban098.sbu.repository.AccountRepository;
@@ -24,6 +23,10 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class AccountService {
+
+  // TODO : Make batch job to compute accounts total balances,
+  //  triggered after import / transaction edit and creation or manually this would make
+  //  the waiting time when transaction number is very high constant
 
   private final AccountRepository accountRepository;
   private final IAuthenticationFacade authenticationFacade;
@@ -44,6 +47,7 @@ public class AccountService {
     account.setName(accountDto.getName());
     account.setDescription(accountDto.getDescription());
     account.setUser(authenticationFacade.getCurrentUser());
+    account.setAccountNumber(accountDto.getAccountNumber());
     return accountRepository.save(account);
   }
 
@@ -55,6 +59,10 @@ public class AccountService {
         accountDto.getDescription() == null
             ? account.getDescription()
             : accountDto.getDescription());
+    account.setAccountNumber(
+        accountDto.getAccountNumber() == null
+            ? account.getAccountNumber()
+            : accountDto.getAccountNumber());
     return accountRepository.save(account);
   }
 
@@ -69,6 +77,7 @@ public class AccountService {
     accountDto.setId(account.getId());
     accountDto.setName(account.getName());
     accountDto.setDescription(account.getDescription());
+    accountDto.setAccountNumber(account.getAccountNumber());
     return accountDto;
   }
 
@@ -107,11 +116,10 @@ public class AccountService {
   private Map<Currency, Double> computeBalance(Account account) {
     Map<Currency, Double> balances = new EnumMap<>(Currency.class);
     for (Transaction transaction : account.getTransactions()) {
-      for (Amount amount : transaction.getAmounts()) {
-        balances.put(
-            amount.getCurrency(),
-            balances.getOrDefault(amount.getCurrency(), 0d) + amount.getValue());
-      }
+      balances.put(
+          transaction.getAmount().getCurrency(),
+          balances.getOrDefault(transaction.getAmount().getCurrency(), 0d)
+              + transaction.getAmount().getValue());
     }
     return balances;
   }

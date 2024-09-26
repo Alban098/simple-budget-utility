@@ -2,20 +2,18 @@ import axios, { AxiosResponse } from "axios";
 import { Transaction } from "../model/Transaction";
 import { Currency } from "../model/Currency";
 import { Amount } from "../model/Amount";
-import { Context } from "../App";
+import { Context, getUser } from "../App";
 import { TransactionDto } from "../model/TransactionDto";
+import moment from "moment";
 
 export default class TransactionService {
-  static async import(
-    formData: FormData,
-    token: string,
-  ): Promise<Transaction[]> {
+  static async import(formData: FormData): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.post(
-      "http://localhost:8080/api/transaction/import",
+      "/api/transaction/import",
       formData,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
@@ -28,14 +26,13 @@ export default class TransactionService {
 
   static async finalizeImport(
     transactions: Transaction[],
-    token: string,
   ): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.post(
-      "http://localhost:8080/api/transaction/import/finalize",
+      "/api/transaction/import/finalize",
       transactions,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
@@ -46,12 +43,12 @@ export default class TransactionService {
     return saved;
   }
 
-  static async findAll(token: string): Promise<Transaction[]> {
+  static async findAll(): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.get(
-      "http://localhost:8080/api/transaction/",
+      "/api/transaction/",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
@@ -62,18 +59,15 @@ export default class TransactionService {
     return transactions;
   }
 
-  static async findByAccount(
-    token: string,
-    accountId?: string,
-  ): Promise<Transaction[]> {
+  static async findByAccount(accountId?: string): Promise<Transaction[]> {
     if (accountId == null || accountId === "-1") {
-      return this.findAll(token);
+      return this.findAll();
     }
     const response: AxiosResponse<Transaction[]> = await axios.get(
-      "http://localhost:8080/api/transaction/",
+      "/api/transaction/",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: { accountId: accountId },
       },
@@ -85,12 +79,12 @@ export default class TransactionService {
     return transactions;
   }
 
-  static async find(id: string, token: string): Promise<TransactionDto> {
+  static async find(id: string): Promise<TransactionDto> {
     const response: AxiosResponse<TransactionDto> = await axios.get(
-      `http://localhost:8080/api/transaction/${id}`,
+      `/api/transaction/${id}`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: { currency: Context.currency },
       },
@@ -98,71 +92,56 @@ export default class TransactionService {
     return this.convertDto(response.data);
   }
 
-  static async create(
-    dto: TransactionDto,
-    token: string,
-  ): Promise<Transaction> {
-    dto.date = new Date(dto.date);
+  static async create(dto: TransactionDto): Promise<Transaction> {
     const response: AxiosResponse<Transaction> = await axios.post(
-      "http://localhost:8080/api/transaction/",
-      dto,
+      "/api/transaction/",
+      { ...dto, date: moment(dto.date).format("YYYY-MM-DD") },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
     return this.convert(response.data);
   }
 
-  static async update(
-    id: string,
-    dto: TransactionDto,
-    token: string,
-  ): Promise<Transaction> {
-    dto.date = new Date(dto.date);
+  static async update(id: string, dto: TransactionDto): Promise<Transaction> {
     const response: AxiosResponse<Transaction> = await axios.put(
-      `http://localhost:8080/api/transaction/${id}`,
-      dto,
+      `/api/transaction/${id}`,
+      { ...dto, date: moment(dto.date).format("YYYY-MM-DD") },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
     return this.convert(response.data);
   }
 
-  static async delete(id: string, token: string) {
-    await axios.delete(`http://localhost:8080/api/transaction/${id}`, {
+  static async delete(id: string) {
+    await axios.delete(`/api/transaction/${id}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${getUser()?.access_token}`,
       },
     });
   }
 
   private static convert(transaction: Transaction): Transaction {
-    const castedAmounts: Amount[] = [];
-    transaction.amounts?.forEach((balance) => {
-      castedAmounts.push({
-        currency: Currency[balance.currency as keyof typeof Currency],
-        value: balance.value,
-      });
-    });
-    transaction.amounts = castedAmounts;
+    const castedAmount: Amount = {
+      currency: Currency[transaction.amount.currency as keyof typeof Currency],
+      value: transaction.amount.value,
+    };
+    transaction.amount = castedAmount;
     transaction.date = new Date(transaction.date);
     return transaction;
   }
 
   private static convertDto(transaction: TransactionDto): TransactionDto {
-    const castedAmounts: Amount[] = [];
-    transaction.amounts?.forEach((balance) => {
-      castedAmounts.push({
-        currency: Currency[balance.currency as keyof typeof Currency],
-        value: balance.value,
-      });
-    });
-    transaction.amounts = castedAmounts;
+    const castedAmount: Amount = {
+      currency: Currency[transaction.amount.currency as keyof typeof Currency],
+      value: transaction.amount.value,
+    };
+    transaction.amount = castedAmount;
     transaction.date = new Date(transaction.date);
     return transaction;
   }

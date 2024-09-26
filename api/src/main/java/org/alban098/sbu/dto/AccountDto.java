@@ -19,6 +19,7 @@ public class AccountDto {
 
   private String id;
   private String name;
+  private String accountNumber;
   private String description;
   private final Collection<AmountDto> balances = new ArrayList<>(Currency.values().length);
   private AmountDto amount = new AmountDto(0, Currency.EUR);

@@ -8,8 +8,6 @@
 package org.alban098.sbu.dto;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import lombok.Getter;
 import lombok.Setter;
 import org.alban098.sbu.utils.Currency;
@@ -23,18 +21,9 @@ public class TransactionUpdateDto {
   private AccountDto account;
   private LocalDate date;
   private String description;
-  private final Collection<AmountDto> amounts = new ArrayList<>(Currency.values().length);
-
-  public TransactionUpdateDto() {
-    for (Currency currency : Currency.values()) {
-      amounts.add(new AmountDto(0, currency));
-    }
-  }
+  private AmountDto amount;
 
   public void setAmount(Currency currency, double value) {
-    amounts.stream()
-        .filter(b -> b.getCurrency().equals(currency))
-        .findFirst()
-        .ifPresent(b -> b.setValue(value));
+    amount = new AmountDto(value, currency);
   }
 }

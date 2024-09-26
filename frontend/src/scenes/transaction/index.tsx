@@ -37,7 +37,6 @@ interface LoaderData {
 export function loader(): LoaderData {
   return {
     transactionsPromise: TransactionService.findByAccount(
-      Context.apiToken,
       Context.filter.accountId,
     ),
   };
@@ -64,19 +63,17 @@ export default function TransactionList() {
   ) => {
     setDeleteDialog({ opened: false, id: undefined });
     if (confirmed && id != null) {
-      await TransactionService.delete(id, Context.apiToken);
+      await TransactionService.delete(id);
       navigate(".", { replace: true });
     }
   };
 
-  const renderAmounts = (id: string, amounts: Amount[]) => {
+  const renderAmount = (id: string, amount: Amount) => {
     return (
       <Box p="5px 0">
-        {amounts.map((amount, index) => (
-          <Box key={id + "_" + index}>
-            <CurrencyChip showZero={false} amount={amount} />
-          </Box>
-        ))}
+        <Box key={id}>
+          <CurrencyChip showZero={false} amount={amount} />
+        </Box>
       </Box>
     );
   };
@@ -131,12 +128,12 @@ export default function TransactionList() {
       cellClassName: "desc-column--cell",
     },
     {
-      field: "amounts",
+      field: "amount",
       headerName: "Total",
       resizable: false,
       width: 180,
       type: "number",
-      renderCell: ({ row: { id, amounts } }) => renderAmounts(id, amounts),
+      renderCell: ({ row: { id, amount } }) => renderAmount(id, amount),
     },
     {
       field: "id",

@@ -9,7 +9,6 @@ package org.alban098.sbu.config;
 
 import org.alban098.sbu.interceptor.UserHandlingInterceptor;
 import org.alban098.sbu.repository.UserRepository;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +22,7 @@ public class ConfigUserInterceptor implements WebMvcConfigurer {
   private final String contextPath;
 
   public ConfigUserInterceptor(
-      UserRepository userRepository,
-      @Value("${server.servlet.context-path:}") String contextPath) {
+      UserRepository userRepository, @Value("${server.servlet.context-path:}") String contextPath) {
     this.userRepository = userRepository;
     this.contextPath = contextPath;
   }

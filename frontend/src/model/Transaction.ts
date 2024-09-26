@@ -6,5 +6,5 @@ export interface Transaction {
   description?: string;
   category: string;
   account: string;
-  amounts: Amount[];
+  amount: Amount;
 }

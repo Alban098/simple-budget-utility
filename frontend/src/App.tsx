@@ -1,5 +1,6 @@
 import { ColorModeContext, useMode } from "./theme";
 import {
+  Alert,
   Box,
   CircularProgress,
   CssBaseline,
@@ -43,6 +44,8 @@ import TransactionImport, {
   action as importTransactionAction,
 } from "./scenes/import/import";
 import TransactionImportMap from "./scenes/import/map";
+import { User } from "oidc-client-ts";
+// import { useEffect } from "react";
 
 // Maybe this is bad, but it works :/
 export const Context = {
@@ -52,8 +55,16 @@ export const Context = {
     year: dayjs().year(),
   },
   currency: Currency.EUR,
-  apiToken: "",
 };
+
+export function getUser() {
+  const oidcStorage = localStorage.getItem(`oidc.user:authority:client_secret`);
+  if (!oidcStorage) {
+    return null;
+  }
+
+  return User.fromStorageString(oidcStorage);
+}
 
 const routes = [
   {
@@ -126,9 +137,22 @@ const routes = [
 export default function App() {
   const auth = useAuth();
 
-  switch (auth.activeNavigator) {
-    case "signinSilent":
-      return (
+  // useEffect(() => {
+  //   return auth.events.addAccessTokenExpiring(() => {
+  //     auth.signinSilent();
+  //   });
+  // }, [auth.events, auth.signinSilent]);
+
+  if (auth.isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          height: "100%",
+          alignItems: "center",
+        }}
+      >
         <CircularProgress
           size={70}
           sx={{
@@ -139,39 +163,32 @@ export default function App() {
             zIndex: 2,
           }}
         />
-      );
-  }
-
-  if (auth.isLoading) {
-    return (
-      <CircularProgress
-        size={70}
-        sx={{
-          position: "fixed",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 2,
-        }}
-      />
+      </Box>
     );
   }
 
   if (auth.error) {
     return (
-      <div>
-        Oops, something happened during the login process ...{" "}
-        {auth.error.message}
-      </div>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          height: "100%",
+          alignItems: "center",
+        }}
+      >
+        <Alert variant="outlined" severity="error">
+          Oops, something happened during the login process ...{" "}
+          {auth.error.message}
+        </Alert>
+      </Box>
     );
   }
 
   if (auth.isAuthenticated) {
-    Context.apiToken = auth.user?.access_token ? auth.user?.access_token : "";
     const router = createBrowserRouter(routes);
     return <RouterProvider router={router} />;
   }
-  Context.apiToken = "";
   auth.signinRedirect().then();
   return <></>;
 }

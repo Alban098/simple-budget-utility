@@ -18,7 +18,6 @@ import lombok.AllArgsConstructor;
 import org.alban098.sbu.dto.DataLineDto;
 import org.alban098.sbu.dto.DataValueDto;
 import org.alban098.sbu.entity.Account;
-import org.alban098.sbu.entity.Amount;
 import org.alban098.sbu.entity.Transaction;
 import org.alban098.sbu.utils.Currency;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,11 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class AnalysisService {
+
+  // TODO : Make distinct objects for analysis,
+  //  computed by batch jobs ether daily or triggered after import / transaction creation and edit
+  //  or manually this would make
+  //  the waiting time when transaction number is very high constant
 
   private final TransactionService transactionService;
   private final CurrencyService currencyService;
@@ -44,19 +48,20 @@ public class AnalysisService {
             ? transactionService.getTransactionsOfAccount(account, startDate, endDate)
             : transactionService.getTransactionsOfUser(startDate, endDate);
     for (Transaction transaction : transactions) {
-      double total = 0;
-      for (Amount amount : transaction.getAmounts()) {
-        if (amount.getValue() < 0) {
-          // Negative, but we want to display as a positive expenses
-          total -= currencyService.convert(amount, currency);
-        }
+      if (transaction.getCategory().isIgnored()) {
+        continue;
       }
-      if (total != 0) {
+      double rectifiedAmount = 0;
+      if (transaction.getAmount().getValue() < 0) {
+        // Negative, but we want to display as a positive expenses
+        rectifiedAmount -= currencyService.convert(transaction.getAmount(), currency);
+      }
+      if (rectifiedAmount != 0) {
         DataValueDto valueDto =
             result.computeIfAbsent(
                 transaction.getCategory().getId(),
                 catId -> new DataValueDto(transaction.getCategory().getName(), 0d));
-        valueDto.setValue(valueDto.getValue() + total);
+        valueDto.setValue(valueDto.getValue() + rectifiedAmount);
       }
     }
     return result.values();
@@ -71,12 +76,9 @@ public class AnalysisService {
       result.add(accountTotal);
       Iterable<Transaction> transactions = transactionService.getTransactionsOfAccount(account);
       for (Transaction transaction : transactions) {
-        double transactionTotal = 0;
-        for (Amount amount : transaction.getAmounts()) {
-          transactionTotal += currencyService.convert(amount, currency);
-        }
-        accountTotal.setValue(accountTotal.getValue() + transactionTotal);
-        total.setValue(total.getValue() + transactionTotal);
+        double convertedAmount = currencyService.convert(transaction.getAmount(), currency);
+        accountTotal.setValue(accountTotal.getValue() + convertedAmount);
+        total.setValue(total.getValue() + convertedAmount);
       }
     }
     return result;
@@ -117,12 +119,11 @@ public class AnalysisService {
 
     double total = 0;
     for (Transaction transaction : transactions) {
-      for (Amount amount : transaction.getAmounts()) {
-        if (aggregationType == AggregationType.ALL
-            || aggregationType == AggregationType.INCOMES && amount.getValue() > 0
-            || aggregationType == AggregationType.EXPENSES && amount.getValue() < 0) {
-          total += currencyService.convert(amount, currency);
-        }
+      if (aggregationType == AggregationType.ALL
+          || aggregationType == AggregationType.INCOMES && transaction.getAmount().getValue() > 0
+          || aggregationType == AggregationType.EXPENSES
+              && transaction.getAmount().getValue() < 0) {
+        total += currencyService.convert(transaction.getAmount(), currency);
       }
     }
     return total;
@@ -171,9 +172,9 @@ public class AnalysisService {
 
     for (Account account : accounts) {
       LocalDate accountStartDate =
-              transactionService.getDateOfFirstTransaction(account, startDate, endDate).minusMonths(1);
+          transactionService.getDateOfFirstTransaction(account, startDate, endDate).minusMonths(1);
       LocalDate accountEndDate =
-              transactionService.getDateOfLastTransaction(account, startDate, endDate).plusMonths(1);
+          transactionService.getDateOfLastTransaction(account, startDate, endDate).plusMonths(1);
       if (accountStartDate.isBefore(restrictedStartDate)) {
         restrictedStartDate = accountStartDate;
       }
@@ -187,7 +188,6 @@ public class AnalysisService {
       DataLineDto currentAccountLine = new DataLineDto();
       currentAccountLine.setLabel(account.getName());
       List<DataValueDto> dataPoints = new ArrayList<>();
-      int index = 0;
       for (int year = restrictedStartDate.getYear(); year <= restrictedEndDate.getYear(); year++) {
         int monthStart =
             year == restrictedStartDate.getYear() ? restrictedStartDate.getMonth().getValue() : 1;
@@ -210,7 +210,6 @@ public class AnalysisService {
 
           accumulateTotal(total, label, value);
           dataPoints.add(value);
-          index++;
         }
       }
       currentAccountLine.setData(dataPoints.toArray(new DataValueDto[0]));
@@ -224,7 +223,8 @@ public class AnalysisService {
   }
 
   private static void accumulateTotal(List<DataValueDto> total, String label, DataValueDto value) {
-    DataValueDto dto = total.stream().filter(t -> t.getLabel().equals(label)).findFirst().orElse(null);
+    DataValueDto dto =
+        total.stream().filter(t -> t.getLabel().equals(label)).findFirst().orElse(null);
     if (dto == null) {
       DataValueDto newValue = new DataValueDto();
       newValue.setLabel(value.getLabel());

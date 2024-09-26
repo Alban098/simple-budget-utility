@@ -9,7 +9,7 @@ import {
 import { Category } from "../../model/Category";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Account } from "../../model/Account";
-import { Currency } from "../../model/Currency";
+import { Currency, getSymbol } from "../../model/Currency";
 import { TransactionDto } from "../../model/TransactionDto";
 
 interface Props {
@@ -60,7 +60,7 @@ export default function TransactionForm({
                 width: "100%",
                 margin: "5px",
               }}
-              defaultValue={transaction?.category?.id}
+              defaultValue={transaction?.category}
               required={true}
               native={true}
               variant="filled"
@@ -80,7 +80,7 @@ export default function TransactionForm({
                 width: "100%",
                 margin: "5px",
               }}
-              defaultValue={transaction?.account?.id}
+              defaultValue={transaction?.account}
               required={true}
               native={true}
               variant="filled"
@@ -94,50 +94,37 @@ export default function TransactionForm({
                 </option>
               ))}
             </Select>
-            <InputLabel>Amounts</InputLabel>
+            <InputLabel>Amount</InputLabel>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <TextField
-                sx={{ flex: 0.3333, margin: "5px" }}
-                id="amountEur"
-                name="amountEur"
-                label="Euro"
-                type="number"
+                sx={{ flex: 0.5, margin: "5px" }}
+                id="amount"
+                name="amount"
+                label="Value"
+                type="decimal"
                 variant="filled"
                 color="secondary"
-                defaultValue={
-                  transaction?.amounts?.findLast(
-                    (a) => a.currency === Currency.EUR,
-                  )?.value
-                }
+                defaultValue={transaction?.amount?.value}
               />
-              <TextField
-                sx={{ flex: 0.3333, margin: "5px" }}
-                id="amountChf"
-                name="amountChf"
-                label="Swiss Franc"
-                type="number"
+              <Select
+                sx={{ flex: 0.5, margin: "5px" }}
+                id="currency"
+                name="currency"
+                label="currency"
+                required={true}
+                native={true}
                 variant="filled"
                 color="secondary"
-                defaultValue={
-                  transaction?.amounts?.findLast(
-                    (a) => a.currency === Currency.CHF,
-                  )?.value
-                }
-              />
-              <TextField
-                sx={{ flex: 0.3333, margin: "5px" }}
-                id="amountUsd"
-                name="amountUsd"
-                label="US Dollar"
-                type="number"
-                variant="filled"
-                color="secondary"
-                defaultValue={
-                  transaction?.amounts?.findLast(
-                    (a) => a.currency === Currency.USD,
-                  )?.value
-                }
-              />
+                defaultValue={transaction?.amount?.currency}
+              >
+                {Object.values(Currency).map((currency) => {
+                  return (
+                    <option key={currency} value={currency}>
+                      {getSymbol(currency)}
+                    </option>
+                  );
+                })}
+              </Select>
             </Box>
             <Box sx={{ display: "flex", justifyContent: "right" }}>
               <Button

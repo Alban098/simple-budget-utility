@@ -14,7 +14,6 @@ import java.util.Optional;
 import org.alban098.sbu.entity.User;
 import org.alban098.sbu.repository.UserRepository;
 import org.alban098.sbu.utils.ForbiddenException;
-import org.hibernate.SessionFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.ClaimAccessor;
@@ -27,8 +26,7 @@ public class UserHandlingInterceptor implements HandlerInterceptor {
   private final UserRepository repository;
   private final String contextPath;
 
-  public UserHandlingInterceptor(
-      UserRepository repository, String contextPath) {
+  public UserHandlingInterceptor(UserRepository repository, String contextPath) {
     this.repository = repository;
     this.contextPath = contextPath;
   }

@@ -5,7 +5,6 @@ import AccountService from "../../service/AccountService";
 import AccountForm from "../../component/form/AccountForm";
 import { redirect, Params } from "react-router-dom";
 import { Account } from "../../model/Account";
-import { Context } from "../../App";
 
 export async function loader({
   params,
@@ -13,7 +12,7 @@ export async function loader({
   params: Params<"id">;
 }): Promise<Account | null> {
   if (params.id !== undefined) {
-    return await AccountService.find(params.id, true, Context.apiToken);
+    return await AccountService.find(params.id, true);
   }
   return null;
 }
@@ -30,7 +29,6 @@ export async function action({
     await AccountService.update(
       params.id,
       Object.fromEntries(formData) as unknown as Account,
-      Context.apiToken,
     );
   }
   return redirect("/account");

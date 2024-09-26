@@ -9,8 +9,6 @@ package org.alban098.sbu.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,29 +42,19 @@ public class Transaction implements Comparable<Transaction> {
 
   @Column private String description;
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-  private Collection<Amount> amounts = new ArrayList<>();
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  private Amount amount;
 
   public Transaction(Account account, Category category, LocalDate date, String description) {
     this.account = account;
     this.category = category;
     this.date = date;
     this.description = description;
-    for (Currency currency : Currency.values()) {
-      amounts.add(new Amount(0d, currency));
-    }
+    this.amount = new Amount(0d, Currency.EUR);
   }
 
   public void setAmount(Currency currency, double value) {
-    if (amounts.stream().filter(b -> b.getCurrency().equals(currency)).findFirst().isEmpty()) {
-      amounts.add(new Amount(value, currency));
-    } else {
-      amounts.stream()
-          .filter(b -> b.getCurrency().equals(currency))
-          .findFirst()
-          .ifPresent(b -> b.setValue(value));
-    }
-    amounts.removeIf(b -> b.getValue() == 0);
+    amount = new Amount(value, currency);
   }
 
   @Override
@@ -83,6 +71,6 @@ public class Transaction implements Comparable<Transaction> {
 
   @Override
   public String toString() {
-    return date.toString() + " " + description + " " + amounts.toString();
+    return date.toString() + " " + description + " " + amount.toString();
   }
 }

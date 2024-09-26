@@ -8,7 +8,6 @@
 package org.alban098.sbu.entity;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
 import lombok.EqualsAndHashCode;
@@ -27,7 +26,7 @@ public class Account {
   private String id;
 
   @Setter @Column private String name;
-
+  @Setter @Column private String accountNumber;
   @Setter @Column private String description;
 
   @Setter
@@ -36,10 +35,6 @@ public class Account {
       fetch = FetchType.EAGER,
       optional = false)
   private User user;
-
-  @Setter
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-  private Collection<Amount> amounts = new ArrayList<>();
 
   @OneToMany(
       cascade = CascadeType.ALL,

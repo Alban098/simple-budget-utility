@@ -39,6 +39,17 @@ export default function AccountForm({ account }: Props) {
               margin: "5px",
             }}
           />
+          <TextField
+            label="Account Number"
+            variant="filled"
+            color="secondary"
+            defaultValue={account?.accountNumber}
+            name="accountNumber"
+            sx={{
+              width: "100%",
+              margin: "5px",
+            }}
+          />
           <Box
             sx={{
               display: "flex",

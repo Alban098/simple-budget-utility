@@ -2,15 +2,15 @@ import axios, { AxiosResponse } from "axios";
 import { Account } from "../model/Account";
 import { Currency } from "../model/Currency";
 import { Amount } from "../model/Amount";
-import { Context } from "../App";
+import { Context, getUser } from "../App";
 
 export default class AccountService {
-  static async findAll(token: string, shallow: boolean): Promise<Account[]> {
+  static async findAll(shallow: boolean): Promise<Account[]> {
     const response: AxiosResponse<Account[]> = await axios.get(
-      "http://localhost:8080/api/account/",
+      "/api/account/",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: { currency: Context.currency, shallow: shallow },
       },
@@ -22,16 +22,12 @@ export default class AccountService {
     return accounts;
   }
 
-  static async find(
-    id: string,
-    shallow: boolean,
-    token: string,
-  ): Promise<Account> {
+  static async find(id: string, shallow: boolean): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.get(
-      `http://localhost:8080/api/account/${id}`,
+      `/api/account/${id}`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: { currency: Context.currency, shallow: shallow },
       },
@@ -39,40 +35,36 @@ export default class AccountService {
     return this.convertCurrencies(response.data);
   }
 
-  static async create(dto: Account, token: string): Promise<Account> {
+  static async create(dto: Account): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.post(
-      "http://localhost:8080/api/account/",
+      "/api/account/",
       dto,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
     return this.convertCurrencies(response.data);
   }
 
-  static async update(
-    id: string,
-    dto: Account,
-    token: string,
-  ): Promise<Account> {
+  static async update(id: string, dto: Account): Promise<Account> {
     const response: AxiosResponse<Account> = await axios.put(
-      `http://localhost:8080/api/account/${id}`,
+      `/api/account/${id}`,
       dto,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
       },
     );
     return this.convertCurrencies(response.data);
   }
 
-  static async delete(id: string, token: string) {
-    await axios.delete(`http://localhost:8080/api/account/${id}`, {
+  static async delete(id: string) {
+    await axios.delete(`/api/account/${id}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${getUser()?.access_token}`,
       },
     });
   }

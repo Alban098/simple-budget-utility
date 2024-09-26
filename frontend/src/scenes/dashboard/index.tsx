@@ -21,14 +21,10 @@ interface LoaderData {
 
 export function loader(): LoaderData {
   return {
-    netWorthPromise: AnalysisService.netWorthInstant(Context.apiToken),
-    netWorthAllTimePromise: AnalysisService.netWorthAnalysis(Context.apiToken),
-    netWorkYearlyPromise: AnalysisService.netWorthYearlyAnalysis(
-      Context.apiToken,
-    ),
-    incomesExpensesPromise: AnalysisService.incomeExpenseAnalysis(
-      Context.apiToken,
-    ),
+    netWorthPromise: AnalysisService.netWorthInstant(),
+    netWorthAllTimePromise: AnalysisService.netWorthAnalysis(),
+    netWorkYearlyPromise: AnalysisService.netWorthYearlyAnalysis(),
+    incomesExpensesPromise: AnalysisService.incomeExpenseAnalysis(),
   };
 }
 
@@ -105,7 +101,7 @@ export default function Dashboard() {
         <Grid
           size={{ lg: 12, xl: 6 }}
           sx={{
-            height: "400px",
+            height: "450px",
             backgroundColor: colors.primary[400],
           }}
         >
@@ -132,7 +128,7 @@ export default function Dashboard() {
         <Grid
           size={{ lg: 12, xl: 6 }}
           sx={{
-            height: "400px",
+            height: "450px",
             backgroundColor: colors.primary[400],
           }}
         >
@@ -159,7 +155,7 @@ export default function Dashboard() {
         <Grid
           size={{ xs: 12 }}
           sx={{
-            height: "400px",
+            height: "450px",
             backgroundColor: colors.primary[400],
           }}
         >

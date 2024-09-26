@@ -1,22 +1,22 @@
 import axios, { AxiosResponse } from "axios";
 import { DataLine, DataValue } from "../model/AnalysisObject";
-import { Context } from "../App";
+import { Context, getUser } from "../App";
 
 export default class AnalysisService {
-  static async refreshExchangeRates(token: string) {
+  static async refreshExchangeRates() {
     await axios.get("/api/analysis/refresh", {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${getUser()?.access_token}`,
       },
     });
   }
 
-  static async categoryAnalysis(token: string): Promise<DataValue[]> {
+  static async categoryAnalysis(): Promise<DataValue[]> {
     const response: AxiosResponse<DataValue[]> = await axios.get(
-      "http://localhost:8080/api/analysis/category",
+      "/api/analysis/category",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           accountId:
@@ -30,12 +30,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async categoryYearlyAnalysis(token: string): Promise<DataValue[]> {
+  static async categoryYearlyAnalysis(): Promise<DataValue[]> {
     const response: AxiosResponse<DataValue[]> = await axios.get(
-      "http://localhost:8080/api/analysis/category/yearly",
+      "/api/analysis/category/yearly",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           year: Context.filter.year,
@@ -50,12 +50,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async categoryMonthlyAnalysis(token: string): Promise<DataValue[]> {
+  static async categoryMonthlyAnalysis(): Promise<DataValue[]> {
     const response: AxiosResponse<DataValue[]> = await axios.get(
-      "http://localhost:8080/api/analysis/category/monthly",
+      "/api/analysis/category/monthly",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           year: Context.filter.year,
@@ -71,14 +71,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async categoryYearlyMonthAnalysis(
-    token: string,
-  ): Promise<DataValue[][]> {
+  static async categoryYearlyMonthAnalysis(): Promise<DataValue[][]> {
     const response: AxiosResponse<DataValue[][]> = await axios.get(
-      "http://localhost:8080/api/analysis/category/yearly/month",
+      "/api/analysis/category/yearly/month",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           year: Context.filter.year,
@@ -93,12 +91,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async netWorthInstant(token: string): Promise<DataValue[]> {
+  static async netWorthInstant(): Promise<DataValue[]> {
     const response: AxiosResponse<DataValue[]> = await axios.get(
-      `http://localhost:8080/api/analysis/netWorth`,
+      `/api/analysis/netWorth`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           currency: Context.currency,
@@ -108,12 +106,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async netWorthAnalysis(token: string): Promise<DataLine[]> {
+  static async netWorthAnalysis(): Promise<DataLine[]> {
     const response: AxiosResponse<DataLine[]> = await axios.get(
-      `http://localhost:8080/api/analysis/summary/netWorth`,
+      `/api/analysis/summary/netWorth`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           currency: Context.currency,
@@ -123,12 +121,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async netWorthYearlyAnalysis(token: string): Promise<DataLine[]> {
+  static async netWorthYearlyAnalysis(): Promise<DataLine[]> {
     const response: AxiosResponse<DataLine[]> = await axios.get(
-      `http://localhost:8080/api/analysis/summary/netWorth/yearly`,
+      `/api/analysis/summary/netWorth/yearly`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           year: Context.filter.year,
@@ -139,12 +137,12 @@ export default class AnalysisService {
     return response.data;
   }
 
-  static async incomeExpenseAnalysis(token: string): Promise<DataValue[][]> {
+  static async incomeExpenseAnalysis(): Promise<DataValue[][]> {
     const response: AxiosResponse<DataValue[][]> = await axios.get(
-      `http://localhost:8080/api/analysis/summary/incomeExpense`,
+      `/api/analysis/summary/incomeExpense`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getUser()?.access_token}`,
         },
         params: {
           year: Context.filter.year,

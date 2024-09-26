@@ -22,7 +22,6 @@ import AccountService from "../../service/AccountService";
 import { Account } from "../../model/Account";
 import React, { Suspense } from "react";
 import { Amount } from "../../model/Amount";
-import { Context } from "../../App";
 
 interface DialogState {
   opened: boolean;
@@ -34,11 +33,11 @@ interface LoaderData {
 }
 
 export function loader(): LoaderData {
-  return { accountsPromise: AccountService.findAll(Context.apiToken, false) };
+  return { accountsPromise: AccountService.findAll(false) };
 }
 
 export function loaderShallow(): LoaderData {
-  return { accountsPromise: AccountService.findAll(Context.apiToken, true) };
+  return { accountsPromise: AccountService.findAll(true) };
 }
 
 export default function AccountList() {
@@ -59,7 +58,7 @@ export default function AccountList() {
   const handleDeleteAccountDialog = async (confirmed: boolean, id?: string) => {
     setDeleteDialog({ opened: false, id: undefined });
     if (confirmed && id != null) {
-      await AccountService.delete(id, Context.apiToken);
+      await AccountService.delete(id);
       navigate(".", { replace: true });
     }
   };

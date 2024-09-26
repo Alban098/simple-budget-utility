@@ -12,14 +12,13 @@ import CurrencySelector from "./selector/CurrencySelector";
 import LoadingCard from "./card/LoadingCard";
 import AnalysisService from "../service/AnalysisService";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { Context } from "../App";
 
 interface LoaderData {
   accountsPromise: Promise<Account[]>;
 }
 
 async function refreshExchangeRates() {
-  await AnalysisService.refreshExchangeRates(Context.apiToken);
+  await AnalysisService.refreshExchangeRates();
 }
 
 export default function Topbar() {

@@ -22,7 +22,7 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
 
   public Iterable<Category> getCategories() {
-    return categoryRepository.findAll();
+    return categoryRepository.findAllByNameAsc();
   }
 
   public Category getCategory(final String id) {
@@ -48,9 +48,5 @@ public class CategoryService {
       dtos.add(createDto(category));
     }
     return dtos;
-  }
-
-  public Category findFirst() {
-    return categoryRepository.findFirstByIdNotNullOrderByIdAsc().orElse(null);
   }
 }

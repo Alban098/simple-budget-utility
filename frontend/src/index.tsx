@@ -3,13 +3,18 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { AuthProvider } from "react-oidc-context";
+import { WebStorageStateStore } from "oidc-client-ts";
 
 const oidcConfig = {
-  authority: import.meta.env.VITE_SOME_KEY,
-  client_id: import.meta.env.VITE_CLIENT_ID,
-  client_secret: import.meta.env.VITE_CLIENT_SECRET,
-  redirect_uri: import.meta.env.VITE_REDIRECT_URI,
-  scope: import.meta.env.VITE_SCOPE,
+  authority: "authority",
+  client_id: "client_id",
+  client_secret: "client_secret",
+  redirect_uri: "redirect_uri",
+  scope: "openid,profile",
+  userStore: new WebStorageStateStore({
+    store: localStorage,
+  }),
+  automaticSilentRenew: true,
 };
 
 const root = ReactDOM.createRoot(

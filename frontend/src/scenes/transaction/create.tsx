@@ -8,9 +8,8 @@ import AccountService from "../../service/AccountService";
 import { Category } from "../../model/Category";
 import { Account } from "../../model/Account";
 import { Currency } from "../../model/Currency";
-import { Amount } from "../../model/Amount";
 import { TransactionDto } from "../../model/TransactionDto";
-import { Context } from "../../App";
+import dayjs from "dayjs";
 
 interface ActionParameters {
   request: Request;
@@ -22,13 +21,12 @@ interface LoaderData {
 }
 
 interface TransactionFormData {
-  date: Date;
+  date: string;
   description: string;
   accountId: string;
   categoryId: string;
-  amountEur: number;
-  amountChf: number;
-  amountUsd: number;
+  amount: number;
+  currency: Currency;
 }
 
 export async function action({ request }: ActionParameters): Promise<Response> {
@@ -38,27 +36,24 @@ export async function action({ request }: ActionParameters): Promise<Response> {
   ) as unknown as TransactionFormData;
 
   const transaction = {} as TransactionDto;
-  transaction.category = await CategoryService.find(
-    entries.categoryId,
-    Context.apiToken,
-  );
+  transaction.category = await CategoryService.find(entries.categoryId);
   transaction.account = { id: entries.accountId } as Account;
-  transaction.date = entries.date;
+  transaction.date = dayjs(
+    entries.date.replace("/", "-"),
+    "MM-DD-YYYY",
+    "en",
+  ).toDate();
   transaction.description = entries.description;
-  transaction.amounts = [
-    { value: entries.amountEur, currency: Currency.EUR } as Amount,
-    { value: entries.amountChf, currency: Currency.CHF } as Amount,
-    { value: entries.amountUsd, currency: Currency.USD } as Amount,
-  ];
+  transaction.amount = { value: entries.amount, currency: entries.currency };
 
-  await TransactionService.create(transaction, Context.apiToken);
+  await TransactionService.create(transaction);
   return redirect("/transaction");
 }
 
 export async function loader(): Promise<LoaderData> {
   return {
-    categories: await CategoryService.findAll(Context.apiToken),
-    accounts: await AccountService.findAll(Context.apiToken, true),
+    categories: await CategoryService.findAll(),
+    accounts: await AccountService.findAll(true),
   };
 }
 

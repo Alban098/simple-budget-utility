@@ -10,7 +10,6 @@ import {
 import { Account } from "../../model/Account";
 import { Suspense, useEffect } from "react";
 import TransactionService from "../../service/TransactionService";
-import { Context } from "../../App";
 import { Transaction } from "../../model/Transaction";
 import ImportTransactionForm from "../../component/form/ImportTransactionForm";
 import { Category } from "../../model/Category";
@@ -34,8 +33,8 @@ export async function action({
 }: ActionParameters): Promise<ActionData> {
   const formData = await request.formData();
   return {
-    categories: await CategoryService.findAll(Context.apiToken),
-    transactions: await TransactionService.import(formData, Context.apiToken),
+    categories: await CategoryService.findAll(),
+    transactions: await TransactionService.import(formData),
   };
 }
 

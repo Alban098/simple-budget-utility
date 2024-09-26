@@ -8,5 +8,5 @@ export interface TransactionDto {
   description?: string;
   category: Category;
   account: Account;
-  amounts: Amount[];
+  amount: Amount;
 }

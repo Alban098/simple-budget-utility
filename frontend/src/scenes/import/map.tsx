@@ -9,13 +9,12 @@ import CurrencyChip from "../../component/CurrencyChip";
 import Header from "../../component/Header";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import TransactionService from "../../service/TransactionService";
-import { Context } from "../../App";
 
 export default function TransactionImportMap() {
   const navigate: NavigateFunction = useNavigate();
 
   async function saveTransactions(transactions: Transaction[]) {
-    await TransactionService.finalizeImport(transactions, Context.apiToken);
+    await TransactionService.finalizeImport(transactions);
     navigate("/transaction");
   }
 
@@ -26,14 +25,12 @@ export default function TransactionImportMap() {
   const transactions = state.transactions as Transaction[];
   const categories = state.categories as Category[];
 
-  const renderAmounts = (id: string, amounts: Amount[]) => {
+  const renderAmount = (id: string, amount: Amount) => {
     return (
       <Box p="5px 0">
-        {amounts.map((amount, index) => (
-          <Box key={id + "_" + index}>
-            <CurrencyChip showZero={false} amount={amount} />
-          </Box>
-        ))}
+        <Box key={id}>
+          <CurrencyChip showZero={false} amount={amount} />
+        </Box>
       </Box>
     );
   };
@@ -62,8 +59,8 @@ export default function TransactionImportMap() {
             }}
             defaultValue={
               category != null
-                ? categories.find((c) => c.id === category)
-                : categories.at(0)
+                ? categories.find((c) => c.id === category)?.id
+                : categories.at(0)?.id
             }
             required={true}
             native={true}
@@ -96,12 +93,12 @@ export default function TransactionImportMap() {
       cellClassName: "desc-column--cell",
     },
     {
-      field: "amounts",
+      field: "amount",
       headerName: "Total",
       resizable: false,
       width: 180,
       type: "number",
-      renderCell: ({ row: { id, amounts } }) => renderAmounts(id, amounts),
+      renderCell: ({ row: { id, amount } }) => renderAmount(id, amount),
     },
   ];
   return (

@@ -33,31 +33,31 @@ public class TransactionService {
   private final CategoryService categoryService;
 
   public Iterable<Transaction> getTransactionsOfUser(final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByUserAndDateBetweenOrderByDateAsc(
+    return transactionRepository.findByUserAndDateBetweenOrderByDate(
         authenticationFacade.getCurrentUser(), from, to);
   }
 
   public Iterable<Transaction> getPositiveTransactionsOfAccount(
       final Account account, final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByAccountAndDateBetweenAndAmountsPositiveOrderByDateAsc(
+    return transactionRepository.findByAccountAndDateBetweenAndAmountsPositiveOrderByDateDesc(
         account, from, to);
   }
 
   public Iterable<Transaction> getPositiveTransactionsOfUser(
       final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByUserAndDateBetweenAndAmountPositiveThanOrderByDateAsc(
+    return transactionRepository.findByUserAndDateBetweenAndAmountPositiveThanOrderByDateDesc(
         authenticationFacade.getCurrentUser(), from, to);
   }
 
   public Iterable<Transaction> getNegativeTransactionsOfAccount(
       final Account account, final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByAccountAndDateBetweenAndAmountsNegativeOrderByDateAsc(
+    return transactionRepository.findByAccountAndDateBetweenAndAmountsNegativeOrderByDateDesc(
         account, from, to);
   }
 
   public Iterable<Transaction> getNegativeTransactionsOfUser(
       final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByUserAndDateBetweenAndAmountNegativeThanOrderByDateAsc(
+    return transactionRepository.findByUserAndDateBetweenAndAmountNegativeThanOrderByDateDesc(
         authenticationFacade.getCurrentUser(), from, to);
   }
 
@@ -101,10 +101,9 @@ public class TransactionService {
     transaction.setCategory(category);
     transaction.setDate(transactionDto.getDate());
     transaction.setDescription(transactionDto.getDescription());
-    for (AmountDto amount : transactionDto.getAmounts()) {
-      if (amount != null && amount.getValue() != null) {
-        transaction.setAmount(amount.getCurrency(), amount.getValue());
-      }
+    if (transactionDto.getAmount() != null && transactionDto.getAmount().getValue() != null) {
+      transaction.setAmount(
+          transactionDto.getAmount().getCurrency(), transactionDto.getAmount().getValue());
     }
     return transactionRepository.save(transaction);
   }
@@ -131,10 +130,9 @@ public class TransactionService {
         transactionDto.getDescription() == null
             ? transaction.getDescription()
             : transactionDto.getDescription());
-    for (AmountDto amount : transactionDto.getAmounts()) {
-      if (amount != null && amount.getValue() != null) {
-        transaction.setAmount(amount.getCurrency(), amount.getValue());
-      }
+    if (transactionDto.getAmount() != null && transactionDto.getAmount().getValue() != null) {
+      transaction.setAmount(
+          transactionDto.getAmount().getCurrency(), transactionDto.getAmount().getValue());
     }
     return transactionRepository.save(transaction);
   }
@@ -159,12 +157,13 @@ public class TransactionService {
     transactionDto.setDate(transaction.getDate());
     transactionDto.setDescription(transaction.getDescription());
     if (transaction.getCategory() != null) {
-      transactionDto.setCategory(ids ? transaction.getCategory().getId() : transaction.getCategory().getName());
+      transactionDto.setCategory(
+          ids ? transaction.getCategory().getId() : transaction.getCategory().getName());
     }
-    transactionDto.setAccount(ids ? transaction.getAccount().getId() : transaction.getAccount().getName());
-    transaction.getAmounts().stream()
-        .filter(amount -> amount != null && amount.getValue() != null && amount.getValue() != 0)
-        .forEach(amount -> transactionDto.setAmount(amount.getCurrency(), amount.getValue()));
+    transactionDto.setAccount(
+        ids ? transaction.getAccount().getId() : transaction.getAccount().getName());
+    transactionDto.setAmount(
+        transaction.getAmount().getCurrency(), transaction.getAmount().getValue());
     return transactionDto;
   }
 
@@ -199,16 +198,17 @@ public class TransactionService {
   public List<Transaction> importTransactions(TransactionDto[] transactions) {
     List<Transaction> savedTransactions = new ArrayList<>();
     for (TransactionDto transactionDto : transactions) {
-      AccountDto account = accountService.createDto(accountService.getAccount(transactionDto.getAccount()));
-      CategoryDto category = categoryService.createDto(categoryService.getCategory(transactionDto.getCategory()));
+      AccountDto account =
+          accountService.createDto(accountService.getAccount(transactionDto.getAccount()));
+      CategoryDto category =
+          categoryService.createDto(categoryService.getCategory(transactionDto.getCategory()));
       TransactionUpdateDto transactionUpdateDto = new TransactionUpdateDto();
       transactionUpdateDto.setDate(transactionDto.getDate());
       transactionUpdateDto.setCategory(category);
       transactionUpdateDto.setAccount(account);
       transactionUpdateDto.setDescription(transactionDto.getDescription());
-      for (AmountDto amount : transactionDto.getAmounts()) {
-        transactionUpdateDto.setAmount(amount.getCurrency(), amount.getValue());
-      }
+      transactionUpdateDto.setAmount(
+          transactionDto.getAmount().getCurrency(), transactionDto.getAmount().getValue());
       savedTransactions.add(create(transactionUpdateDto));
     }
     return savedTransactions;

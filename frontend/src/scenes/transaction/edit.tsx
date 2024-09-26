@@ -7,10 +7,9 @@ import CategoryService from "../../service/CategoryService";
 import { Category } from "../../model/Category";
 import { Account } from "../../model/Account";
 import AccountService from "../../service/AccountService";
-import { Amount } from "../../model/Amount";
 import { Currency } from "../../model/Currency";
 import { TransactionDto } from "../../model/TransactionDto";
-import { Context } from "../../App";
+import dayjs from "dayjs";
 
 interface LoaderData {
   transaction: TransactionDto | null;
@@ -19,13 +18,12 @@ interface LoaderData {
 }
 
 interface TransactionFormData {
-  date: Date;
+  date: string;
   description: string;
   accountId: string;
   categoryId: string;
-  amountEur: number;
-  amountChf: number;
-  amountUsd: number;
+  amount: number;
+  currency: Currency;
 }
 
 export async function loader({
@@ -35,11 +33,9 @@ export async function loader({
 }): Promise<LoaderData> {
   return {
     transaction:
-      params.id === undefined
-        ? null
-        : await TransactionService.find(params.id, Context.apiToken),
-    categories: await CategoryService.findAll(Context.apiToken),
-    accounts: await AccountService.findAll(Context.apiToken, true),
+      params.id === undefined ? null : await TransactionService.find(params.id),
+    categories: await CategoryService.findAll(),
+    accounts: await AccountService.findAll(true),
   } as LoaderData;
 }
 
@@ -56,21 +52,18 @@ export async function action({
   ) as unknown as TransactionFormData;
 
   const transaction = {} as TransactionDto;
-  transaction.category = await CategoryService.find(
-    entries.categoryId,
-    Context.apiToken,
-  );
+  transaction.category = await CategoryService.find(entries.categoryId);
   transaction.account = { id: entries.accountId } as Account;
-  transaction.date = entries.date;
+  transaction.date = dayjs(
+    entries.date.replace("/", "-"),
+    "MM-DD-YYYY",
+    "en",
+  ).toDate();
   transaction.description = entries.description;
-  transaction.amounts = [
-    { value: entries.amountEur, currency: Currency.EUR } as Amount,
-    { value: entries.amountChf, currency: Currency.CHF } as Amount,
-    { value: entries.amountUsd, currency: Currency.USD } as Amount,
-  ];
+  transaction.amount = { value: entries.amount, currency: entries.currency };
 
   if (params.id !== undefined) {
-    await TransactionService.update(params.id, transaction, Context.apiToken);
+    await TransactionService.update(params.id, transaction);
   }
   return redirect("/transaction");
 }

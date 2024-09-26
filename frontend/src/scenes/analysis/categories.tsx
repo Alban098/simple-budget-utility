@@ -21,12 +21,10 @@ interface LoaderData {
 
 export function loader(): LoaderData {
   return {
-    totalPromise: AnalysisService.categoryAnalysis(Context.apiToken),
-    yearlyPromise: AnalysisService.categoryYearlyAnalysis(Context.apiToken),
-    monthlyPromise: AnalysisService.categoryMonthlyAnalysis(Context.apiToken),
-    analysisPromise: AnalysisService.categoryYearlyMonthAnalysis(
-      Context.apiToken,
-    ),
+    totalPromise: AnalysisService.categoryAnalysis(),
+    yearlyPromise: AnalysisService.categoryYearlyAnalysis(),
+    monthlyPromise: AnalysisService.categoryMonthlyAnalysis(),
+    analysisPromise: AnalysisService.categoryYearlyMonthAnalysis(),
   };
 }
 
@@ -46,7 +44,7 @@ export default function CategoryAnalysis() {
         <Grid
           size={{ md: 12, lg: 4 }}
           sx={{
-            height: "450px",
+            height: "460px",
             backgroundColor: colors.primary[400],
             pb: "25px",
           }}
@@ -73,7 +71,7 @@ export default function CategoryAnalysis() {
         <Grid
           size={{ md: 12, lg: 4 }}
           sx={{
-            height: "450px",
+            height: "460px",
             backgroundColor: colors.primary[400],
             pb: "25px",
           }}
@@ -97,7 +95,7 @@ export default function CategoryAnalysis() {
         <Grid
           size={{ md: 12, lg: 4 }}
           sx={{
-            height: "450px",
+            height: "460px",
             backgroundColor: colors.primary[400],
             pb: "25px",
           }}
@@ -118,7 +116,7 @@ export default function CategoryAnalysis() {
         <Grid
           size={{ xs: 12 }}
           sx={{
-            height: "450px",
+            height: "570px",
             backgroundColor: colors.primary[400],
           }}
         >
