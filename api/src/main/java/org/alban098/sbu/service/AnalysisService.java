@@ -92,6 +92,32 @@ public class AnalysisService {
     return netWorthShortScale(accounts, currency, startDate, endDate);
   }
 
+  public Collection<Collection<DataValueDto>> yearlyTransit(
+      Account account, int year, Currency currency) {
+    Collection<Collection<DataValueDto>> response = new ArrayList<>();
+    for (Month month : Month.values()) {
+      response.add(
+          List.of(
+              new DataValueDto(
+                  "Incomes",
+                  aggregateOver(
+                      account,
+                      currency,
+                      LocalDate.of(year, month, 1),
+                      LocalDate.of(year, month, month.length(Year.of(year).isLeap())),
+                      AggregationType.INCOMES)),
+              new DataValueDto(
+                  "Expenses",
+                  aggregateOver(
+                      account,
+                      currency,
+                      LocalDate.of(year, month, 1),
+                      LocalDate.of(year, month, month.length(Year.of(year).isLeap())),
+                      AggregationType.EXPENSES))));
+    }
+    return response;
+  }
+
   private double aggregateOver(
       Account account,
       Currency currency,
@@ -222,7 +248,15 @@ public class AnalysisService {
     return response;
   }
 
-  private static void accumulateTotal(List<DataValueDto> total, String label, DataValueDto value) {
+  private String computeLongScaleLabel(int month, int year) {
+    if (Month.of(month).ordinal() != 0) {
+      return Month.of(month).getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + "-" + year;
+    } else {
+      return String.valueOf(year);
+    }
+  }
+
+  private void accumulateTotal(List<DataValueDto> total, String label, DataValueDto value) {
     DataValueDto dto =
         total.stream().filter(t -> t.getLabel().equals(label)).findFirst().orElse(null);
     if (dto == null) {
@@ -233,39 +267,5 @@ public class AnalysisService {
     } else {
       dto.setValue(dto.getValue() + value.getValue());
     }
-  }
-
-  private String computeLongScaleLabel(int month, int year) {
-    if (Month.of(month).ordinal() != 0) {
-      return Month.of(month).getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + "-" + year;
-    } else {
-      return String.valueOf(year);
-    }
-  }
-
-  public Collection<Collection<DataValueDto>> yearlyTransit(
-      Account account, int year, Currency currency) {
-    Collection<Collection<DataValueDto>> response = new ArrayList<>();
-    for (Month month : Month.values()) {
-      response.add(
-          List.of(
-              new DataValueDto(
-                  "Incomes",
-                  aggregateOver(
-                      account,
-                      currency,
-                      LocalDate.of(year, month, 1),
-                      LocalDate.of(year, month, month.length(Year.of(year).isLeap())),
-                      AggregationType.INCOMES)),
-              new DataValueDto(
-                  "Expenses",
-                  aggregateOver(
-                      account,
-                      currency,
-                      LocalDate.of(year, month, 1),
-                      LocalDate.of(year, month, month.length(Year.of(year).isLeap())),
-                      AggregationType.EXPENSES))));
-    }
-    return response;
   }
 }

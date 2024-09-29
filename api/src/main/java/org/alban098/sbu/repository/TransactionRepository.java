@@ -51,7 +51,7 @@ public interface TransactionRepository extends CrudRepository<Transaction, Strin
   @Query(
       """
           select t from Transaction t inner join t.amount amount
-          where t.account = ?1 and t.date between ?2 and ?3 and amount.value < 0
+          where t.account = ?1 and t.date between ?2 and ?3 and amount.value < 0 and t.category.ignored = false
           order by t.date desc""")
   Iterable<Transaction> findByAccountAndDateBetweenAndAmountsNegativeOrderByDateDesc(
       Account account, LocalDate dateStart, LocalDate dateEnd);
@@ -59,7 +59,7 @@ public interface TransactionRepository extends CrudRepository<Transaction, Strin
   @Query(
       """
           select t from Transaction t inner join t.amount amount
-          where t.account = ?1 and t.date between ?2 and ?3 and amount.value > 0
+          where t.account = ?1 and t.date between ?2 and ?3 and amount.value > 0 and t.category.ignored = false
           order by t.date desc""")
   Iterable<Transaction> findByAccountAndDateBetweenAndAmountsPositiveOrderByDateDesc(
       Account account, LocalDate dateStart, LocalDate dateEnd);
@@ -67,16 +67,16 @@ public interface TransactionRepository extends CrudRepository<Transaction, Strin
   @Query(
       """
           select t from Transaction t inner join t.amount amount
-          where t.account.user = ?1 and t.date between ?2 and ?3 and amount.value < 0
+          where t.account.user = ?1 and t.date between ?2 and ?3 and amount.value < 0 and t.category.ignored = false
           order by t.date desc""")
-  List<Transaction> findByUserAndDateBetweenAndAmountNegativeThanOrderByDateDesc(
+  List<Transaction> findByUserAndDateBetweenAndAmountNegativeOrderByDateDesc(
       User user, LocalDate dateStart, LocalDate dateEnd);
 
   @Query(
       """
           select t from Transaction t inner join t.amount amount
-          where t.account.user = ?1 and t.date between ?2 and ?3 and amount.value > 0
+          where t.account.user = ?1 and t.date between ?2 and ?3 and amount.value > 0 and t.category.ignored = false
           order by t.date desc""")
-  List<Transaction> findByUserAndDateBetweenAndAmountPositiveThanOrderByDateDesc(
+  List<Transaction> findByUserAndDateBetweenAndAmountPositiveOrderByDateDesc(
       User user, LocalDate dateStart, LocalDate dateEnd);
 }

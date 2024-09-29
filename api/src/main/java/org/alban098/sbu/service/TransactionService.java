@@ -45,7 +45,7 @@ public class TransactionService {
 
   public Iterable<Transaction> getPositiveTransactionsOfUser(
       final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByUserAndDateBetweenAndAmountPositiveThanOrderByDateDesc(
+    return transactionRepository.findByUserAndDateBetweenAndAmountPositiveOrderByDateDesc(
         authenticationFacade.getCurrentUser(), from, to);
   }
 
@@ -57,7 +57,7 @@ public class TransactionService {
 
   public Iterable<Transaction> getNegativeTransactionsOfUser(
       final LocalDate from, final LocalDate to) {
-    return transactionRepository.findByUserAndDateBetweenAndAmountNegativeThanOrderByDateDesc(
+    return transactionRepository.findByUserAndDateBetweenAndAmountNegativeOrderByDateDesc(
         authenticationFacade.getCurrentUser(), from, to);
   }
 
