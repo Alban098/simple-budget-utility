@@ -20,7 +20,10 @@ import org.springframework.security.oauth2.core.ClaimAccessor;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-/** This interceptor in responsible for creating User Account when a new OpenID Subject connect */
+/**
+ * This interceptor will reject all request for which the OIDC User has no internal user, User
+ * creation is not automatic and should be done manually through the API
+ */
 public class UserHandlingInterceptor implements HandlerInterceptor {
 
   private final UserRepository repository;

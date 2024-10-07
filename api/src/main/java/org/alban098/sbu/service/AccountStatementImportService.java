@@ -26,10 +26,12 @@ import org.springframework.stereotype.Service;
 public class AccountStatementImportService {
 
   private final Map<Bank, AccountStatementImportStrategy> strategies = new HashMap<>();
+  private final ClassificationService classificationService;
 
-  public AccountStatementImportService(CategoryService categoryService) {
+  public AccountStatementImportService(ClassificationService classificationService) {
     strategies.put(Bank.LBP, new LbpAccountStatementImportStrategy());
     strategies.put(Bank.YUH, new YuhAccountStatementImportStrategy());
+    this.classificationService = classificationService;
   }
 
   public List<Transaction> importTransactions(Bank bank, Account account, byte[] file)
@@ -37,6 +39,7 @@ public class AccountStatementImportService {
     try (PDDocument pdf = Loader.loadPDF(file)) {
       strategies.get(bank).setAccount(account);
       List<Transaction> transactions = strategies.get(bank).parseTransactions(pdf);
+      classificationService.tryClassifyTransactions(transactions);
       return transactions;
     }
   }

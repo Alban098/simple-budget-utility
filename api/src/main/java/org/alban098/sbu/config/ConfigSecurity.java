@@ -52,11 +52,6 @@ public class ConfigSecurity {
                     }))
         .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
         .build();
-    //    return http.authorizeHttpRequests(
-    //            authorizeRequests -> authorizeRequests.anyRequest().permitAll())
-    //        .csrf(AbstractHttpConfigurer::disable)
-    //        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    //        .build();
   }
 
   @Bean

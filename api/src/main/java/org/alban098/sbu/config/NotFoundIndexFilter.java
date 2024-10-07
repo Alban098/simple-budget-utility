@@ -18,6 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * This filter is responsible to redirect all non API calls to the actual frontend of the
+ * application
+ */
 @Component
 public class NotFoundIndexFilter extends OncePerRequestFilter {
 

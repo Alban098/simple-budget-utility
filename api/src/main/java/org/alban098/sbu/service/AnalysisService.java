@@ -125,22 +125,19 @@ public class AnalysisService {
       LocalDate endDate,
       AggregationType aggregationType) {
     Iterable<Transaction> transactions;
-    LocalDate actualEndDate = endDate.minusDays(1);
     switch (aggregationType) {
       case INCOMES -> transactions =
           account != null
-              ? transactionService.getPositiveTransactionsOfAccount(
-                  account, startDate, actualEndDate)
-              : transactionService.getPositiveTransactionsOfUser(startDate, actualEndDate);
+              ? transactionService.getPositiveTransactionsOfAccount(account, startDate, endDate)
+              : transactionService.getPositiveTransactionsOfUser(startDate, endDate);
       case EXPENSES -> transactions =
           account != null
-              ? transactionService.getNegativeTransactionsOfAccount(
-                  account, startDate, actualEndDate)
-              : transactionService.getNegativeTransactionsOfUser(startDate, actualEndDate);
+              ? transactionService.getNegativeTransactionsOfAccount(account, startDate, endDate)
+              : transactionService.getNegativeTransactionsOfUser(startDate, endDate);
       default -> transactions =
           account != null
-              ? transactionService.getTransactionsOfAccount(account, startDate, actualEndDate)
-              : transactionService.getTransactionsOfUser(startDate, actualEndDate);
+              ? transactionService.getTransactionsOfAccount(account, startDate, endDate)
+              : transactionService.getTransactionsOfUser(startDate, endDate);
     }
 
     double total = 0;
@@ -171,7 +168,11 @@ public class AnalysisService {
               weekDate -> {
                 runningTotal[0] +=
                     aggregateOver(
-                        account, currency, periodStartDate.get(), weekDate, AggregationType.ALL);
+                        account,
+                        currency,
+                        periodStartDate.get(),
+                        weekDate.minusDays(1),
+                        AggregationType.ALL);
                 DataValueDto value = new DataValueDto();
                 value.setValue(runningTotal[0]);
                 value.setLabel(String.valueOf(data.size()));
