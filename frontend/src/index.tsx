@@ -6,10 +6,10 @@ import { AuthProvider } from "react-oidc-context";
 import { WebStorageStateStore } from "oidc-client-ts";
 
 const oidcConfig = {
-  authority: "authority",
-  client_id: "client_id",
-  client_secret: "client_secret",
-  redirect_uri: "redirect_uri",
+  authority: "%%authority%%",
+  client_id: "%%client_id%%",
+  client_secret: "%%client_secret%%",
+  redirect_uri: "%%redirect_url%%",
   scope: "openid,profile",
   userStore: new WebStorageStateStore({
     store: localStorage,

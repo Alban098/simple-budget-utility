@@ -58,7 +58,9 @@ export const Context = {
 };
 
 export function getUser() {
-  const oidcStorage = localStorage.getItem(`oidc.user:authority:client_secret`);
+  const oidcStorage = localStorage.getItem(
+    `oidc.user:%%authority%%:%%client_id%%`,
+  );
   if (!oidcStorage) {
     return null;
   }
