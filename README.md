@@ -15,29 +15,24 @@ and I do not plan to expand it too much.
 
 ## Configuration
 
-Some step to follow before running the application locally.
-
-### Environment variables
-
 This tool needs to run behind an OpenID SSO Provider such as **Keycloak** or **Authentik**, to provide that functionality you must replace the appropriate configuration both in the backend and frontend
 
 To do that, change the placeholder values in `frontend/src/index.tsx`, `frontend/src/App.tsx` and `api/src/main/resources/application.properties`
-- **CLIENT_ID** : retrieved from your OIDC Provider.
-- **CLIENT_SECRET** : retrieved from your OIDC Provider.
-- **SSO_ISSUER_URL** : retrieved from your OIDC Provider.
-- **BD_HOST** : base URL/IP of your database, with port
+- **%%client_id%%** : retrieved from your OIDC Provider.
+- **%%client_secret%%** : retrieved from your OIDC Provider.
+- **%%authority%%** : retrieved from your OIDC Provider.
+- **%%redirect_url%%** : default redirect URL of the SSO
+- **%%db_host%%** : base URL/IP of your database, with port
 
 ### Deployment
 
-No automation for now, just do the following
-- `./gradlew :api:spotlessApply` will format the code for the build to succeed
-- `./gradlew bundleApp` will bundle the frontend, embed it to be served by Springboot then build the backend
-- Copy `api/build/libs/api.jar` and `Dockerfile` in a separate folder and build the docker image
-- That docker image can be deployed and the application will run under port 8080 (can be remapped via Docker)
+GitHub workflow will, on push to main, automatically 
+- populate the above-mentioned variables
+- build a docker image
+- push it to a private repository as the tagged **latest**
+- A simple redeploy from **Portainer** or user a **Watchtower** Container will automatically update the Production environment
 
-Planning to do an automation pipeline to automatically replace SSO configuration and create the docker image.
-
-### Limitiation
+### Limitation
 
 A lot of frontend request are redundant, but the goal of the application was to be up and running fast while learning frontend with React and not to be well optimised
 
