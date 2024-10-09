@@ -25,32 +25,32 @@ jobs:
           replace: ${{ secrets.SSO_AUTHORITY }}
           regex: false
 
-      - name: Set Authority
+      - name: Set authorize endpoint
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "%%authorize_endpoint%%"
+          replace: ${{ secrets.SSO_AUTH_ENDPOINT }}
+          regex: false
+
+      - name: Set token endpoint
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "%%token_endpoint%%"
+          replace: ${{ secrets.SSO_TOKEN_ENDPOINT }}
+          regex: false
+
+      - name: Set Client ID
         uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "%%client_id%%"
           replace: ${{ secrets.CLIENT_ID }}
           regex: false
 
-      - name: Set Authority
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%client_secret%%"
-          replace: ${{ secrets.CLIENT_SECRET }}
-          regex: false
-
-      - name: Set Authority
+      - name: Set Redirect URI
         uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "%%redirect_url%%"
           replace: ${{ secrets.REDIRECT_URL }}
-          regex: false
-
-      - name: Set Authority
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%db_host%%"
-          replace: ${{ secrets.DB_HOST }}
           regex: false
 
       - name: Make gradlew executable
