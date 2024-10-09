@@ -15,14 +15,23 @@ and I do not plan to expand it too much.
 
 ## Configuration
 
-This tool needs to run behind an OpenID SSO Provider such as **Keycloak** or **Authentik**, to provide that functionality you must replace the appropriate configuration both in the backend and frontend
+This tool needs to run behind an OpenID SSO Provider such as **Keycloak** or **Authentik**, to provide that functionality you must set the following environment variables in the Docker Container running the application
+- **CLIENT_ID** : retrieved from your OIDC Provider, used by both **Frontend** and **Backend**.
+- **CLIENT_SECRET** : retrieved from your OIDC Provider, only used by **Backend**, **Frontend** will use PKCE to not expose the CLIENT_SECRET.
+- **SSO_ISSUER_URL** : retrieved from your OIDC Provider, used by both **Frontend** and **Backend**.
+- **REDIRECT_URL** : default redirect URL of the SSO, used only by **Frontend**
+- **DATABASE_HOST** : base URL/IP of your database, with port, used only by **Backend**.
 
-To do that, change the placeholder values in `frontend/src/index.tsx`, `frontend/src/App.tsx` and `api/src/main/resources/application.properties`
+Those environment variables are referenced directly in `api/src/main/resources/application.properties` to be loaded by SpringBoot
+
+The tricky part is to inject them into the Frontend post Vite Build (`frontend/src/index.tsx` & `frontend/src/App.tsx`)
+To achieve that, the following placeholders are used in those files.
 - **%%client_id%%** : retrieved from your OIDC Provider.
 - **%%client_secret%%** : retrieved from your OIDC Provider.
 - **%%authority%%** : retrieved from your OIDC Provider.
-- **%%redirect_url%%** : default redirect URL of the SSO
-- **%%db_host%%** : base URL/IP of your database, with port
+- **%%redirect_url%%** : default redirect URL of the SSO 
+The published docker image actually still contains them, and it is the job of `entrypoint.sh` to extract the bundled Frontend, replace those placeholder with the environment variables, and then patch the JAR on the fly.
+
 
 ### Deployment
 
