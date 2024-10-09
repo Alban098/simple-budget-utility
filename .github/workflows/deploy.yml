@@ -18,41 +18,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Set Authority
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%authority%%"
-          replace: ${{ secrets.SSO_AUTHORITY }}
-          regex: false
-
-      - name: Set authorize endpoint
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%authorize_endpoint%%"
-          replace: ${{ secrets.SSO_AUTH_ENDPOINT }}
-          regex: false
-
-      - name: Set token endpoint
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%token_endpoint%%"
-          replace: ${{ secrets.SSO_TOKEN_ENDPOINT }}
-          regex: false
-
-      - name: Set Client ID
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%client_id%%"
-          replace: ${{ secrets.CLIENT_ID }}
-          regex: false
-
-      - name: Set Redirect URI
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "%%redirect_url%%"
-          replace: ${{ secrets.REDIRECT_URL }}
-          regex: false
-
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
