@@ -12,14 +12,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter
 @Getter
-@Data
 @EqualsAndHashCode
 @NoArgsConstructor
 @Entity
@@ -70,9 +69,8 @@ public class Category {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  @Setter @Column private String name;
+  @Column private String name;
 
-  @Setter
   @Column(nullable = false)
   private boolean ignored = false;
 

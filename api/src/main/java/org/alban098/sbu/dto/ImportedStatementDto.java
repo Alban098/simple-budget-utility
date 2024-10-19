@@ -10,21 +10,16 @@ package org.alban098.sbu.dto;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
-import org.alban098.sbu.utils.Currency;
 
 @Getter
 @Setter
-public class TransactionDto {
+public class ImportedStatementDto {
 
   private String id;
-  private String category;
   private String account;
   private LocalDate date;
-  private String description;
-  private AmountDto amount;
-  private boolean imported;
-
-  public void setAmount(Currency currency, double value) {
-    amount = new AmountDto(value, currency);
-  }
+  private String file;
+  private int transactionCount;
+  private LocalDate firstTransactionDate;
+  private LocalDate lastTransactionDate;
 }

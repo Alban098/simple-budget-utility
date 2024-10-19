@@ -24,6 +24,7 @@ import TransactionService from "../../service/TransactionService";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import { Context } from "../../App";
 import { Suspense, useState } from "react";
+import UploadIcon from "@mui/icons-material/Upload";
 
 type DialogState = {
   opened: boolean;
@@ -95,6 +96,15 @@ export default function TransactionList() {
 
   const columns: GridColDef<Transaction>[] = [
     {
+      field: "imported",
+      headerName: "",
+      resizable: false,
+      width: 20,
+      renderCell: ({ row: { imported } }) =>
+        imported ? <UploadIcon></UploadIcon> : <></>,
+      cellClassName: "imported-column--cell",
+    },
+    {
       field: "date",
       headerName: "Date",
       type: "date",
@@ -163,6 +173,10 @@ export default function TransactionList() {
         },
         "& .account-column--cell": {
           color: colors.redAccent[300],
+          fontWeight: "bold",
+        },
+        "& .imported-column--cell": {
+          color: colors.greenAccent[500],
           fontWeight: "bold",
         },
         "& .category-column--cell": {

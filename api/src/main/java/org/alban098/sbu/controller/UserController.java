@@ -10,6 +10,7 @@ package org.alban098.sbu.controller;
 import org.alban098.sbu.dto.UserDto;
 import org.alban098.sbu.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ public class UserController {
   }
 
   @PostMapping("/create")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<UserDto> create(@RequestBody UserDto userDto) {
     userService.create(userDto);
     return ResponseEntity.ok().build();

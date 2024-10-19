@@ -9,12 +9,13 @@ import CurrencyChip from "../../component/CurrencyChip";
 import Header from "../../component/Header";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import TransactionService from "../../service/TransactionService";
+import { ImportStatement } from "../../model/ImportStatement";
 
 export default function TransactionImportMap() {
   const navigate: NavigateFunction = useNavigate();
 
-  async function saveTransactions(transactions: Transaction[]) {
-    await TransactionService.finalizeImport(transactions);
+  async function saveTransactions(importStatement: ImportStatement) {
+    await TransactionService.finalizeImport(importStatement);
     navigate("/transaction");
   }
 
@@ -22,7 +23,7 @@ export default function TransactionImportMap() {
   const colors = tokens(theme.palette.mode);
 
   const { state } = useLocation();
-  const transactions = state.transactions as Transaction[];
+  const importStatement = state.importStatement as ImportStatement;
   const categories = state.categories as Category[];
 
   const renderAmount = (id: string, amount: Amount) => {
@@ -68,7 +69,7 @@ export default function TransactionImportMap() {
             label="Category"
             name="categoryId"
             onChange={(e) => {
-              const t = transactions.find((t) => t.id === id);
+              const t = importStatement.transactions.find((t) => t.id === id);
               if (t != null) {
                 t.category = e.target.value as string;
               }
@@ -147,7 +148,7 @@ export default function TransactionImportMap() {
         />
         <Button
           variant="contained"
-          onClick={() => saveTransactions(transactions)}
+          onClick={() => saveTransactions(importStatement)}
           color="success"
           startIcon={<AddCardIcon />}
         >
@@ -159,7 +160,7 @@ export default function TransactionImportMap() {
         <DataGrid
           isRowSelectable={() => false}
           getRowHeight={() => "auto"}
-          rows={transactions}
+          rows={importStatement.transactions}
           columns={columns}
         />
       </Box>

@@ -5,10 +5,11 @@ import { Amount } from "../model/Amount";
 import { Context, getUser } from "../App";
 import { TransactionDto } from "../model/TransactionDto";
 import moment from "moment";
+import { ImportStatement } from "../model/ImportStatement";
 
 export default class TransactionService {
-  static async import(formData: FormData): Promise<Transaction[]> {
-    const response: AxiosResponse<Transaction[]> = await axios.post(
+  static async import(formData: FormData): Promise<ImportStatement> {
+    const response: AxiosResponse<ImportStatement> = await axios.post(
       "/api/transaction/import",
       formData,
       {
@@ -18,18 +19,22 @@ export default class TransactionService {
       },
     );
     const transactions: Transaction[] = [];
-    response.data.forEach((transaction: Transaction) =>
+    response.data.transactions.forEach((transaction: Transaction) =>
       transactions.push(this.convert(transaction)),
     );
-    return transactions;
+    return {
+      transactions: transactions,
+      accountId: response.data.accountId,
+      fileName: response.data.fileName,
+    } as ImportStatement;
   }
 
   static async finalizeImport(
-    transactions: Transaction[],
+    importStatement: ImportStatement,
   ): Promise<Transaction[]> {
     const response: AxiosResponse<Transaction[]> = await axios.post(
       "/api/transaction/import/finalize",
-      transactions,
+      importStatement,
       {
         headers: {
           Authorization: `Bearer ${getUser()?.access_token}`,

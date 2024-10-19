@@ -42,6 +42,7 @@ import { Currency } from "./model/Currency";
 import { useAuth } from "react-oidc-context";
 import TransactionImport, {
   action as importTransactionAction,
+  loader as importTransactionLoader,
 } from "./scenes/import/import";
 import TransactionImportMap from "./scenes/import/map";
 import { User } from "oidc-client-ts";
@@ -98,7 +99,7 @@ const routes = [
       {
         path: "/transaction/import",
         element: <TransactionImport />,
-        loader: accountLoaderShallow,
+        loader: importTransactionLoader,
         action: importTransactionAction,
       },
       {

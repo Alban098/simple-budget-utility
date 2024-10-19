@@ -45,12 +45,15 @@ public class Transaction implements Comparable<Transaction> {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   private Amount amount;
 
+  @Column private boolean isImported;
+
   public Transaction(Account account, Category category, LocalDate date, String description) {
     this.account = account;
     this.category = category;
     this.date = date;
     this.description = description;
     this.amount = new Amount(0d, Currency.EUR);
+    this.isImported = false;
   }
 
   public void setAmount(Currency currency, double value) {

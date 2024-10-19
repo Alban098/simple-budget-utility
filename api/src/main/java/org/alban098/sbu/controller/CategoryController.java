@@ -13,6 +13,7 @@ import org.alban098.sbu.dto.CategoryDto;
 import org.alban098.sbu.entity.Category;
 import org.alban098.sbu.service.CategoryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,6 +39,7 @@ public class CategoryController {
   }
 
   @PostMapping("/")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<CategoryDto> create(@RequestBody CategoryDto categoryDto)
       throws URISyntaxException {
     Category category = categoryService.create(categoryDto);

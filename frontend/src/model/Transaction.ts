@@ -7,4 +7,5 @@ export interface Transaction {
   category: string;
   account: string;
   amount: Amount;
+  imported: boolean;
 }

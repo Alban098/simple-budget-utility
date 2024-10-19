@@ -9,4 +9,5 @@ export interface TransactionDto {
   category: Category;
   account: Account;
   amount: Amount;
+  imported: boolean;
 }

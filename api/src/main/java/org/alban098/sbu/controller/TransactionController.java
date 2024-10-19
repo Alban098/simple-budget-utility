@@ -22,6 +22,7 @@ import org.alban098.sbu.service.AccountStatementImportService;
 import org.alban098.sbu.service.TransactionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -62,9 +63,10 @@ public class TransactionController {
   }
 
   @PostMapping("/")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TransactionDto> create(@RequestBody TransactionUpdateDto transactionDto)
       throws URISyntaxException {
-    Transaction transaction = transactionService.create(transactionDto);
+    Transaction transaction = transactionService.create(transactionDto, false);
     return ResponseEntity.created(new URI("/api/transaction/" + transaction.getId()))
         .body(transactionService.createDto(transaction, true));
   }
@@ -72,23 +74,32 @@ public class TransactionController {
   @PostMapping(
       path = "/import",
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  public ResponseEntity<Collection<TransactionDto>> importTransaction(
-      @ModelAttribute ImportDto importDto) throws IOException, ParseException {
+  public ResponseEntity<ImportStatementDto> importTransaction(@ModelAttribute ImportDto importDto)
+      throws IOException, ParseException {
     Account account = accountService.getAccount(importDto.getAccount());
     Collection<Transaction> transactions =
         accountStatementImportService.importTransactions(
             Bank.valueOf(importDto.getBank()), account, importDto.getFile().getBytes());
-    return ResponseEntity.ok(transactionService.createDtos(transactions, true));
+    ImportStatementDto dto = new ImportStatementDto();
+    dto.setTransactions(
+        transactionService.createDtos(transactions, true).toArray(new TransactionDto[0]));
+    dto.setFileName(importDto.getFile().getOriginalFilename());
+    dto.setAccountId(account.getId());
+    return ResponseEntity.ok(dto);
   }
 
   @PostMapping("/import/finalize")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<Collection<TransactionDto>> finalizeImport(
-      @RequestBody TransactionDto[] transactions) {
-    List<Transaction> savedTransactions = transactionService.importTransactions(transactions);
+      @RequestBody ImportStatementDto dto) {
+    List<Transaction> savedTransactions =
+        transactionService.importTransactions(dto.getTransactions());
+    accountStatementImportService.registerFile(dto);
     return ResponseEntity.ok(transactionService.createDtos(savedTransactions, true));
   }
 
   @PutMapping("/{id}")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TransactionDto> update(
       @PathVariable String id, @RequestBody TransactionUpdateDto transactionDto) {
     Transaction transaction = transactionService.update(id, transactionDto);
@@ -96,6 +107,7 @@ public class TransactionController {
   }
 
   @DeleteMapping("/{id}")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TransactionDto> delete(@PathVariable String id) {
     transactionService.delete(id);
     return ResponseEntity.ok().build();

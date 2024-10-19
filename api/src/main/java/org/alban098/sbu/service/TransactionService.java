@@ -78,7 +78,7 @@ public class TransactionService {
     return transactionRepository.findById(id).orElse(null);
   }
 
-  public Transaction create(TransactionUpdateDto transactionDto) {
+  public Transaction create(TransactionUpdateDto transactionDto, boolean imported) {
     Transaction transaction = new Transaction();
     if (transactionDto.getAccount() == null) {
       throw new RuntimeException("Account is required");
@@ -105,6 +105,7 @@ public class TransactionService {
       transaction.setAmount(
           transactionDto.getAmount().getCurrency(), transactionDto.getAmount().getValue());
     }
+    transaction.setImported(imported);
     return transactionRepository.save(transaction);
   }
 
@@ -164,6 +165,7 @@ public class TransactionService {
         ids ? transaction.getAccount().getId() : transaction.getAccount().getName());
     transactionDto.setAmount(
         transaction.getAmount().getCurrency(), transaction.getAmount().getValue());
+    transactionDto.setImported(transaction.isImported());
     return transactionDto;
   }
 
@@ -209,7 +211,7 @@ public class TransactionService {
       transactionUpdateDto.setDescription(transactionDto.getDescription());
       transactionUpdateDto.setAmount(
           transactionDto.getAmount().getCurrency(), transactionDto.getAmount().getValue());
-      savedTransactions.add(create(transactionUpdateDto));
+      savedTransactions.add(create(transactionUpdateDto, true));
     }
     return savedTransactions;
   }

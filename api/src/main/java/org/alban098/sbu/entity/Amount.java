@@ -12,7 +12,6 @@ import lombok.*;
 import org.alban098.sbu.utils.Currency;
 
 @Getter
-@Data
 @EqualsAndHashCode
 @NoArgsConstructor
 @Entity

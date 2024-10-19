@@ -13,6 +13,7 @@ import org.alban098.sbu.entity.Account;
 import org.alban098.sbu.service.AccountService;
 import org.alban098.sbu.utils.Currency;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,12 +44,14 @@ public class AccountController {
   }
 
   @PostMapping("/")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<AccountDto> create(@RequestBody AccountDto accountDto) {
     Account account = accountService.create(accountDto);
     return ResponseEntity.ok(accountService.createDto(account));
   }
 
   @PutMapping("/{id}")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<AccountDto> update(
       @PathVariable String id, @RequestBody AccountDto accountDto) {
     Account account = accountService.update(id, accountDto);
@@ -56,6 +59,7 @@ public class AccountController {
   }
 
   @DeleteMapping("/{id}")
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<String> delete(@PathVariable String id) {
     accountService.delete(id);
     return ResponseEntity.ok(id);

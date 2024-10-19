@@ -27,7 +27,7 @@ public class ClassificationService {
         continue;
       }
       for (ClassificationRules rule : rules) {
-        if (transaction.getDescription().matches(rule.getRegex())) {
+        if (transaction.getDescription().strip().matches(rule.getRegex())) {
           transaction.setCategory(rule.getCategory());
           break;
         }
